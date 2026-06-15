@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل دخول الأدمن - متجر أولاد شعلان</title>
+    
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    
+    <!-- Style -->
+    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        /* استايلات إضافية خاصة بصفحة تسجيل الدخول */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary-blue));
+            padding: 20px;
+        }
+        
+        .login-card {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 450px;
+            width: 100%;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        
+        .login-logo {
+            font-size: 60px;
+            color: var(--secondary-gold);
+            margin-bottom: 20px;
+        }
+        
+        .login-card h2 {
+            color: var(--primary-dark);
+            margin-bottom: 10px;
+        }
+        
+        .login-card p {
+            color: var(--gray-text);
+            margin-bottom: 30px;
+        }
+        
+        .login-form .form-group {
+            text-align: right;
+        }
+        
+        .login-form input {
+            border-radius: 50px;
+            padding: 15px 20px;
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            border-radius: 50px;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+        
+        .login-footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #EEE;
+            color: var(--gray-text);
+            font-size: 14px;
+        }
+        
+        .error-message {
+            background: #FADBD8;
+            color: var(--danger-red);
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .loading-spinner {
+            display: none;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-logo">
+                <i class="fas fa-store"></i>
+            </div>
+            <h2>مرحباً بعودتك</h2>
+            <p>تسجيل دخول لوحة تحكم الأدمن</p>
+            
+            <div class="error-message" id="errorMessage">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span id="errorText"></span>
+            </div>
+            
+            <form class="login-form" id="loginForm">
+                <div class="form-group">
+                    <label><i class="fas fa-envelope"></i> البريد الإلكتروني</label>
+                    <input type="email" id="email" placeholder="admin@myshop.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> كلمة المرور</label>
+                    <input type="password" id="password" placeholder="********" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary login-btn" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+                </button>
+                
+                <div class="loading-spinner" id="loadingSpinner">
+                    <i class="fas fa-spinner fa-spin"></i> جاري التحقق...
+                </div>
+            </form>
+            
+            <div class="login-footer">
+                <i class="fas fa-shield-alt"></i> منطقة آمنة -仅限于 المديرين
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"></script>
+
+    <!-- Firebase Config -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5tuzZf8VTqT2J8MSZ5zLnzbqRsT_lipA",
+            authDomain: "awlad-sh3lan-store.firebaseapp.com",
+            projectId: "awlad-sh3lan-store",
+            storageBucket: "awlad-sh3lan-store.firebasestorage.app",
+            messagingSenderId: "77191704198",
+            appId: "1:77191704198:web:d2ce184d9c8ec2e876eb07"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+    </script>
+
+    <!-- Custom Script -->
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('loginBtn');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const errorMessage = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+
+        function showError(message) {
+            errorText.textContent = message;
+            errorMessage.style.display = 'flex';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 4000);
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            
+            if (!email || !password) {
+                showError('الرجاء إدخال البريد الإلكتروني وكلمة المرور');
+                return;
+            }
+            
+            // إظهار حالة التحميل
+            loginBtn.style.display = 'none';
+            loadingSpinner.style.display = 'block';
+            
+            try {
+                // محاولة تسجيل الدخول
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                
+                // التحقق من وجود المستخدم في مجموعة admins
+                const adminDoc = await db.collection('admins').doc(user.uid).get();
+                
+                if (adminDoc.exists) {
+                    // تسجيل الدخول ناجح والأدمن موجود
+                    window.location.href = 'admin-dashboard.html';
+                } else {
+                    // المستخدم مش أدمن - تسجيل خروج تلقائي
+                    await auth.signOut();
+                    showError('ليس لديك صلاحية الدخول إلى لوحة التحكم');
+                    loginBtn.style.display = 'block';
+                    loadingSpinner.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('خطأ في تسجيل الدخول:', error);
+                
+                let errorMessage = 'فشل تسجيل الدخول';
+                switch (error.code) {
+                    case 'auth/user-not-found':
+                        errorMessage = 'البريد الإلكتروني غير موجود';
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage = 'كلمة المرور غير صحيحة';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = 'البريد الإلكتروني غير صالح';
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMessage = 'تم تعطيل الحساب مؤقتاً. حاول مرة أخرى لاحقاً';
+                        break;
+                }
+                showError(errorMessage);
+                loginBtn.style.display = 'block';
+                loadingSpinner.style.display = 'none';
+            }
+        });
+        
+        // التحقق إذا كان المستخدم مسجل الدخول مسبقاً
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                // في حالة وجود مستخدم، تحقق إذا كان أدمن
+                const adminDoc = await db.collection('admins').doc(user.uid).get();
+                if (adminDoc.exists) {
+                    window.location.href = 'admin-dashboard.html';
+                } else {
+                    await auth.signOut();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
