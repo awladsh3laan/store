@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم | متجر أولاد شعلان</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: #f0f2f5;
+        }
+        
+        :root {
+            --sky-blue: #00B4D8;
+            --gold-dark: #B8860B;
+            --gold-light: #DAA520;
+            --green-light: #90E0EF;
+            --dark-bg: #1a2a3a;
+            --white: #ffffff;
+            --shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        /* الهيدر */
+        .header {
+            background: var(--dark-bg);
+            color: white;
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--gold-light);
+        }
+        
+        .logo span { color: var(--sky-blue); }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            cursor: pointer;
+        }
+        
+        /* الجريد */
+        .dashboard {
+            padding: 2rem 5%;
+        }
+        
+        .welcome {
+            background: linear-gradient(135deg, var(--sky-blue), var(--green-light));
+            color: white;
+            padding: 1.5rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+        
+        .stat-card i {
+            font-size: 2.5rem;
+            color: var(--sky-blue);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--gold-dark);
+        }
+        
+        /* الجريد الرئيسي */
+        .grid-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark-bg);
+        }
+        
+        .admin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .grid-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        
+        .grid-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        
+        .grid-card i {
+            font-size: 3rem;
+            color: var(--sky-blue);
+            margin-bottom: 1rem;
+        }
+        
+        .grid-card h3 {
+            color: var(--gold-dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        .grid-card p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .header { flex-direction: column; text-align: center; }
+            .admin-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <div class="logo">أولاد <span>شعلان</span> | لوحة التحكم</div>
+    <div class="user-info">
+        <span id="adminEmail">مرحباً مدير</span>
+        <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> خروج</button>
+    </div>
+</header>
+
+<div class="dashboard">
+    <div class="welcome">
+        <h2><i class="fas fa-chart-line"></i> مرحباً بك في لوحة التحكم</h2>
+        <p>من هنا يمكنك إدارة متجرك بالكامل</p>
+    </div>
+    
+    <div class="stats-grid">
+        <div class="stat-card">
+            <i class="fas fa-box"></i>
+            <div class="stat-number" id="productsCount">0</div>
+            <p>المنتجات</p>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-shopping-cart"></i>
+            <div class="stat-number" id="ordersCount">0</div>
+            <p>الطلبات</p>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-tag"></i>
+            <div class="stat-number" id="categoriesCount">0</div>
+            <p>التصنيفات</p>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-store"></i>
+            <div class="stat-number" id="brandsCount">0</div>
+            <p>البراندات</p>
+        </div>
+    </div>
+    
+    <h2 class="grid-title"><i class="fas fa-cogs"></i> إدارة المتجر</h2>
+    <div class="admin-grid">
+        <a href="admin-products.html" class="grid-card">
+            <i class="fas fa-boxes"></i>
+            <h3>إدارة المنتجات</h3>
+            <p>إضافة، تعديل، حذف المنتجات والتصنيفات والبراندات</p>
+        </a>
+        <a href="admin-slider.html" class="grid-card">
+            <i class="fas fa-images"></i>
+            <h3>إدارة السلايدر</h3>
+            <p>إضافة وتعديل السلايدر والبنرات الإعلانية</p>
+        </a>
+        <a href="admin-shipping.html" class="grid-card">
+            <i class="fas fa-truck"></i>
+            <h3>إعدادات الشحن</h3>
+            <p>إدارة البلدان والمدن والمحافظات</p>
+        </a>
+        <a href="admin-orders.html" class="grid-card">
+            <i class="fas fa-clipboard-list"></i>
+            <h3>إدارة الطلبات</h3>
+            <p>متابعة وتغيير حالة الطلبات</p>
+        </a>
+    </div>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyD5tuzZf8VTqT2J8MSZ5zLnzbqRsT_lipA",
+        authDomain: "awlad-sh3lan-store.firebaseapp.com",
+        projectId: "awlad-sh3lan-store",
+        storageBucket: "awlad-sh3lan-store.firebasestorage.app",
+        messagingSenderId: "77191704198",
+        appId: "1:77191704198:web:d2ce184d9c8ec2e876eb07"
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    
+    // التحقق من تسجيل الدخول
+    auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+            window.location.href = 'admin-login.html';
+            return;
+        }
+        // التحقق من صلاحيات الأدمن
+        const adminDoc = await db.collection('admins').doc(user.uid).get();
+        if (!adminDoc.exists) {
+            await auth.signOut();
+            window.location.href = 'admin-login.html';
+            return;
+        }
+        document.getElementById('adminEmail').innerHTML = `<i class="fas fa-user-shield"></i> مرحباً ${user.email}`;
+        loadStats();
+    });
+    
+    async function loadStats() {
+        const products = await db.collection('products').get();
+        const orders = await db.collection('orders').get();
+        const categories = await db.collection('categories').get();
+        const brands = await db.collection('brands').get();
+        
+        document.getElementById('productsCount').innerText = products.size;
+        document.getElementById('ordersCount').innerText = orders.size;
+        document.getElementById('categoriesCount').innerText = categories.size;
+        document.getElementById('brandsCount').innerText = brands.size;
+    }
+    
+    async function logout() {
+        await auth.signOut();
+        localStorage.removeItem('adminLoggedIn');
+        window.location.href = 'admin-login.html';
+    }
+</script>
+
+</body>
+</html>
