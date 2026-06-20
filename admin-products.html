@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة المنتجات | أولاد شعلان</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Tajawal', sans-serif; background: #f0f2f5; }
+        :root {
+            --sky-blue: #00B4D8;
+            --gold-dark: #B8860B;
+            --gold-light: #DAA520;
+            --green-light: #90E0EF;
+            --dark-bg: #1a2a3a;
+            --shadow: 0 8px 25px rgba(0,0,0,0.08);
+            --transition: all 0.3s ease;
+        }
+        .header {
+            background: var(--dark-bg);
+            color: white;
+            padding: 0.8rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .logo-img { height: 40px; width: auto; max-width: 140px; object-fit: contain; }
+        .logout-btn { background: #dc3545; color: white; border: none; padding: 0.4rem 1.2rem; border-radius: 25px; cursor: pointer; }
+        .container { padding: 1.5rem 5%; }
+        .back-link { display: inline-block; margin-bottom: 1rem; color: var(--sky-blue); text-decoration: none; }
+        .tabs { display: flex; gap: 0.8rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .tab-btn { padding: 0.6rem 1.5rem; background: white; border: none; border-radius: 30px; cursor: pointer; font-weight: 600; box-shadow: var(--shadow); transition: var(--transition); }
+        .tab-btn.active { background: var(--sky-blue); color: white; }
+        .tab-pane { display: none; background: white; padding: 1.5rem; border-radius: 20px; box-shadow: var(--shadow); }
+        .tab-pane.active { display: block; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .form-grid input, .form-grid select, .form-grid textarea { width: 100%; padding: 0.7rem; border: 1px solid #ddd; border-radius: 10px; font-family: inherit; }
+        .form-grid .full { grid-column: 1 / -1; }
+        .btn { padding: 0.7rem 1.5rem; border: none; border-radius: 30px; cursor: pointer; font-weight: 600; transition: var(--transition); }
+        .btn-primary { background: var(--sky-blue); color: white; }
+        .btn-primary:hover { background: #0098b8; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-warning { background: var(--gold-dark); color: white; }
+        .image-preview { max-width: 150px; max-height: 120px; object-fit: cover; border-radius: 10px; margin-top: 0.5rem; }
+        .items-grid { display: grid; gap: 0.8rem; margin-top: 1rem; }
+        .item-card { background: #f9f9f9; padding: 0.8rem 1rem; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+        .item-card img { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; }
+        .item-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+        .item-actions button { padding: 0.3rem 0.8rem; border: none; border-radius: 6px; cursor: pointer; font-size: 0.8rem; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-content { background: white; width: 95%; max-width: 700px; max-height: 90vh; border-radius: 25px; padding: 2rem; overflow-y: auto; }
+        .modal-close { float: left; cursor: pointer; font-size: 1.5rem; color: #999; }
+        .drag-drop-area { border: 2px dashed #ddd; padding: 2rem; text-align: center; border-radius: 15px; cursor: pointer; transition: var(--transition); }
+        .drag-drop-area.dragover { border-color: var(--sky-blue); background: rgba(0,180,216,0.05); }
+        .ai-btn { background: linear-gradient(135deg, #6f42c1, #8b5cf6); color: white; border: none; padding: 0.5rem 1rem; border-radius: 25px; cursor: pointer; margin-top: 0.5rem; }
+        .ai-btn:hover { opacity: 0.9; }
+        @media (max-width: 768px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .header { flex-direction: column; text-align: center; }
+            .item-card { flex-direction: column; text-align: center; }
+            .tabs { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <img src="https://i.servimg.com/u/f54/18/11/62/61/tm/picsar12.png" alt="أولاد شعلان" class="logo-img">
+    <div><span style="color:var(--gold-light);">إدارة المنتجات</span> <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> خروج</button></div>
+</header>
+
+<div class="container">
+    <a href="admin-dashboard.html" class="back-link"><i class="fas fa-arrow-right"></i> العودة للوحة التحكم</a>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('products')">📦 المنتجات</button>
+        <button class="tab-btn" onclick="showTab('categories')">🏷️ التصنيفات</button>
+        <button class="tab-btn" onclick="showTab('brands')">🏢 البراندات</button>
+    </div>
+
+    <!-- ===== تبويب المنتجات ===== -->
+    <div id="productsTab" class="tab-pane active">
+        <h3><i class="fas fa-plus-circle"></i> إضافة منتج جديد</h3>
+        <form id="productForm" class="form-grid">
+            <input type="text" id="pName" placeholder="اسم المنتج" required>
+            <input type="number" id="pPrice" placeholder="السعر" required>
+            <input type="number" id="pDiscount" placeholder="سعر العرض (اختياري)">
+            <input type="number" id="pStock" placeholder="الكمية" required>
+            <select id="pCategory" required><option value="">اختر التصنيف</option></select>
+            <select id="pBrand" required><option value="">اختر البراند</option></select>
+            <div class="full">
+                <textarea id="pDesc" rows="2" placeholder="وصف المنتج"></textarea>
+                <button type="button" class="ai-btn" onclick="generateAIDescription()"><i class="fas fa-robot"></i> أنشئ وصفاً بالذكاء الاصطناعي</button>
+            </div>
+            <div class="full">
+                <div class="drag-drop-area" id="dropArea" onclick="document.getElementById('pImage').click()">
+                    <i class="fas fa-cloud-upload-alt" style="font-size:2rem;color:var(--sky-blue);"></i>
+                    <p>اسحب الصورة هنا أو اضغط للرفع</p>
+                    <input type="file" id="pImage" accept="image/*" multiple style="display:none">
+                </div>
+                <div id="imagePreviewContainer" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.5rem;"></div>
+            </div>
+            <div class="full"><button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> إضافة المنتج</button></div>
+        </form>
+
+        <h3 style="margin-top:2rem;"><i class="fas fa-list"></i> قائمة المنتجات</h3>
+        <div id="productsList" class="items-grid"></div>
+    </div>
+
+    <!-- ===== تبويب التصنيفات ===== -->
+    <div id="categoriesTab" class="tab-pane">
+        <h3><i class="fas fa-plus-circle"></i> إضافة تصنيف</h3>
+        <form id="categoryForm" class="form-grid">
+            <input type="text" id="cName" placeholder="اسم التصنيف" required>
+            <select id="cParent"><option value="">تصنيف رئيسي</option></select>
+            <div class="full">
+                <input type="file" id="cImage" accept="image/*">
+                <img id="cPreview" class="image-preview" style="display:none;">
+            </div>
+            <div class="full"><button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> إضافة تصنيف</button></div>
+        </form>
+        <h3 style="margin-top:1.5rem;">التصنيفات الحالية</h3>
+        <div id="categoriesList" class="items-grid"></div>
+    </div>
+
+    <!-- ===== تبويب البراندات ===== -->
+    <div id="brandsTab" class="tab-pane">
+        <h3><i class="fas fa-plus-circle"></i> إضافة براند</h3>
+        <form id="brandForm" class="form-grid">
+            <input type="text" id="bName" placeholder="اسم البراند" required>
+            <input type="text" id="bDesc" placeholder="وصف مختصر">
+            <div class="full">
+                <input type="file" id="bImage" accept="image/*">
+                <img id="bPreview" class="image-preview" style="display:none;">
+            </div>
+            <div class="full"><button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> إضافة براند</button></div>
+        </form>
+        <h3 style="margin-top:1.5rem;">البراندات الحالية</h3>
+        <div id="brandsList" class="items-grid"></div>
+    </div>
+</div>
+
+<!-- ===== مودال تعديل المنتج ===== -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <span class="modal-close" onclick="closeEditModal()">&times;</span>
+        <h3><i class="fas fa-edit"></i> تعديل المنتج</h3>
+        <form id="editForm" class="form-grid">
+            <input type="text" id="eName" placeholder="اسم المنتج" required>
+            <input type="number" id="ePrice" placeholder="السعر" required>
+            <input type="number" id="eDiscount" placeholder="سعر العرض">
+            <input type="number" id="eStock" placeholder="الكمية" required>
+            <select id="eCategory" required><option value="">اختر التصنيف</option></select>
+            <select id="eBrand" required><option value="">اختر البراند</option></select>
+            <div class="full"><textarea id="eDesc" rows="2" placeholder="وصف المنتج"></textarea></div>
+            <div class="full"><button type="submit" class="btn btn-success"><i class="fas fa-save"></i> حفظ التغييرات</button></div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyD5tuzZf8VTqT2J8MSZ5zLnzbqRsT_lipA",
+        authDomain: "awlad-sh3lan-store.firebaseapp.com",
+        projectId: "awlad-sh3lan-store",
+        storageBucket: "awlad-sh3lan-store.firebasestorage.app",
+        messagingSenderId: "77191704198",
+        appId: "1:77191704198:web:d2ce184d9c8ec2e876eb07"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const IMGBB_API_KEY = "99506f7c2987acaf6709c7fb0e978298";
+    let currentEditId = null;
+    let uploadedImages = [];
+
+    // ===== التحقق من تسجيل الدخول =====
+    auth.onAuthStateChanged(async (user) => {
+        if (!user) { window.location.href = 'admin.html'; return; }
+        const adminDoc = await db.collection('admins').doc(user.uid).get();
+        if (!adminDoc.exists) { await auth.signOut(); window.location.href = 'admin.html'; return; }
+        loadProducts();
+        loadCategories();
+        loadBrands();
+        loadCategorySelects();
+    });
+
+    // ===== رفع الصور لـ ImgBB =====
+    async function uploadToImgBB(file) {
+        const formData = new FormData();
+        formData.append("image", file);
+        const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: formData });
+        const data = await response.json();
+        if (data.success) return data.data.url;
+        throw new Error("فشل رفع الصورة");
+    }
+
+    // ===== معاينة الصور =====
+    function previewImages(files) {
+        const container = document.getElementById('imagePreviewContainer');
+        container.innerHTML = '';
+        for (const file of files) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.width = '80px';
+                img.style.height = '80px';
+                img.style.objectFit = 'cover';
+                img.style.borderRadius = '8px';
+                img.style.border = '2px solid var(--sky-blue)';
+                container.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+        }
+        uploadedImages = files;
+    }
+
+    document.getElementById('pImage')?.addEventListener('change', (e) => previewImages(e.target.files));
+
+    // ===== Drag & Drop =====
+    const dropArea = document.getElementById('dropArea');
+    if (dropArea) {
+        dropArea.addEventListener('dragover', (e) => { e.preventDefault(); dropArea.classList.add('dragover'); });
+        dropArea.addEventListener('dragleave', () => dropArea.classList.remove('dragover'));
+        dropArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropArea.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                document.getElementById('pImage').files = e.dataTransfer.files;
+                previewImages(e.dataTransfer.files);
+            }
+        });
+    }
+
+    // ===== الذكاء الاصطناعي للوصف =====
+    function generateAIDescription() {
+        const name = document.getElementById('pName').value.trim();
+        if (!name) { alert('الرجاء كتابة اسم المنتج أولاً'); return; }
+        const desc = `منتج ${name} عالي الجودة من متجر أولاد شعلان. مثالي للاستخدام اليومي مع ضمان الجودة والأداء الممتاز.`;
+        document.getElementById('pDesc').value = desc;
+    }
+
+    // ===== تحميل التصنيفات في السيلكت =====
+    async function loadCategorySelects() {
+        const snapshot = await db.collection('categories').get();
+        const options = snapshot.docs.map(d => `<option value="${d.id}">${d.data().name}</option>`).join('');
+        document.getElementById('pCategory').innerHTML = '<option value="">اختر التصنيف</option>' + options;
+        document.getElementById('eCategory').innerHTML = '<option value="">اختر التصنيف</option>' + options;
+        const parentSelect = document.getElementById('cParent');
+        parentSelect.innerHTML = '<option value="">تصنيف رئيسي</option>' + options;
+    }
+
+    async function loadBrandSelects() {
+        const snapshot = await db.collection('brands').get();
+        const options = snapshot.docs.map(d => `<option value="${d.id}">${d.data().name}</option>`).join('');
+        document.getElementById('pBrand').innerHTML = '<option value="">اختر البراند</option>' + options;
+        document.getElementById('eBrand').innerHTML = '<option value="">اختر البراند</option>' + options;
+    }
+
+    // ===== إضافة منتج =====
+    document.getElementById('productForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const images = [];
+        for (const file of uploadedImages) {
+            try { images.push(await uploadToImgBB(file)); } catch(err) { alert('فشل رفع الصورة'); return; }
+        }
+        await db.collection('products').add({
+            name: document.getElementById('pName').value,
+            price: parseFloat(document.getElementById('pPrice').value),
+            discountPrice: parseFloat(document.getElementById('pDiscount').value) || null,
+            stock: parseInt(document.getElementById('pStock').value),
+            categoryId: document.getElementById('pCategory').value,
+            brandId: document.getElementById('pBrand').value,
+            description: document.getElementById('pDesc').value,
+            images: images,
+            createdAt: new Date().toISOString()
+        });
+        alert('✅ تم إضافة المنتج');
+        document.getElementById('productForm').reset();
+        document.getElementById('imagePreviewContainer').innerHTML = '';
+        uploadedImages = [];
+        loadProducts();
+    });
+
+    // ===== عرض المنتجات =====
+    async function loadProducts() {
+        const snapshot = await db.collection('products').get();
+        const container = document.getElementById('productsList');
+        container.innerHTML = '';
+        for (const doc of snapshot.docs) {
+            const p = doc.data();
+            const cat = await db.collection('categories').doc(p.categoryId).get();
+            const brand = await db.collection('brands').doc(p.brandId).get();
+            container.innerHTML += `
+                <div class="item-card">
+                    <div style="display:flex;align-items:center;gap:0.8rem;flex-wrap:wrap;">
+                        ${p.images && p.images[0] ? `<img src="${p.images[0]}" alt="${p.name}">` : '<i class="fas fa-box" style="font-size:2rem;color:#ccc;"></i>'}
+                        <div><strong>${p.name}</strong><br><small>${p.price} جنيه | ${cat.exists ? cat.data().name : '-'} | ${brand.exists ? brand.data().name : '-'}</small></div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn btn-warning" onclick="editProduct('${doc.id}')"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-danger" onclick="deleteProduct('${doc.id}')"><i class="fas fa-trash"></i></button>
+                        <button class="btn btn-success" onclick="addOffer('${doc.id}')"><i class="fas fa-gift"></i></button>
+                    </div>
+                </div>
+            `;
+        }
+        loadBrandSelects();
+    }
+
+    // ===== حذف منتج =====
+    async function deleteProduct(id) {
+        if (confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
+            await db.collection('products').doc(id).delete();
+            loadProducts();
+        }
+    }
+
+    // ===== إضافة عرض =====
+    function addOffer(id) {
+        const discount = prompt('أدخل سعر العرض الجديد:');
+        if (discount && !isNaN(discount)) {
+            db.collection('products').doc(id).update({ discountPrice: parseFloat(discount) });
+            loadProducts();
+        }
+    }
+
+    // ===== تعديل منتج =====
+    async function editProduct(id) {
+        const doc = await db.collection('products').doc(id).get();
+        const p = doc.data();
+        currentEditId = id;
+        document.getElementById('eName').value = p.name || '';
+        document.getElementById('ePrice').value = p.price || '';
+        document.getElementById('eDiscount').value = p.discountPrice || '';
+        document.getElementById('eStock').value = p.stock || '';
+        document.getElementById('eCategory').value = p.categoryId || '';
+        document.getElementById('eBrand').value = p.brandId || '';
+        document.getElementById('eDesc').value = p.description || '';
+        document.getElementById('editModal').style.display = 'flex';
+    }
+
+    function closeEditModal() { document.getElementById('editModal').style.display = 'none'; }
+
+    document.getElementById('editForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await db.collection('products').doc(currentEditId).update({
+            name: document.getElementById('eName').value,
+            price: parseFloat(document.getElementById('ePrice').value),
+            discountPrice: parseFloat(document.getElementById('eDiscount').value) || null,
+            stock: parseInt(document.getElementById('eStock').value),
+            categoryId: document.getElementById('eCategory').value,
+            brandId: document.getElementById('eBrand').value,
+            description: document.getElementById('eDesc').value
+        });
+        alert('✅ تم تحديث المنتج');
+        closeEditModal();
+        loadProducts();
+    });
+
+    // ===== إدارة التصنيفات =====
+    document.getElementById('categoryForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        let imageUrl = '';
+        const file = document.getElementById('cImage').files[0];
+        if (file) imageUrl = await uploadToImgBB(file);
+        await db.collection('categories').add({
+            name: document.getElementById('cName').value,
+            parentId: document.getElementById('cParent').value || null,
+            imageUrl: imageUrl
+        });
+        alert('✅ تم إضافة التصنيف');
+        document.getElementById('categoryForm').reset();
+        document.getElementById('cPreview').style.display = 'none';
+        loadCategories();
+        loadCategorySelects();
+    });
+
+    async function loadCategories() {
+        const snapshot = await db.collection('categories').get();
+        const container = document.getElementById('categoriesList');
+        container.innerHTML = snapshot.docs.map(doc => {
+            const c = doc.data();
+            return `
+                <div class="item-card">
+                    <div style="display:flex;align-items:center;gap:0.8rem;">
+                        ${c.imageUrl ? `<img src="${c.imageUrl}" style="width:40px;height:40px;border-radius:50%;">` : '<i class="fas fa-tag"></i>'}
+                        <span><strong>${c.name}</strong> ${c.parentId ? '← فرعي' : '← رئيسي'}</span>
+                    </div>
+                    <div><button class="btn btn-danger" onclick="deleteCategory('${doc.id}')"><i class="fas fa-trash"></i></button></div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    async function deleteCategory(id) {
+        if (confirm('حذف التصنيف سيؤثر على المنتجات المرتبطة. متأكد؟')) {
+            await db.collection('categories').doc(id).delete();
+            loadCategories();
+            loadCategorySelects();
+        }
+    }
+
+    // ===== إدارة البراندات =====
+    document.getElementById('brandForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        let imageUrl = '';
+        const file = document.getElementById('bImage').files[0];
+        if (file) imageUrl = await uploadToImgBB(file);
+        await db.collection('brands').add({
+            name: document.getElementById('bName').value,
+            description: document.getElementById('bDesc').value,
+            imageUrl: imageUrl
+        });
+        alert('✅ تم إضافة البراند');
+        document.getElementById('brandForm').reset();
+        document.getElementById('bPreview').style.display = 'none';
+        loadBrands();
+        loadBrandSelects();
+    });
+
+    async function loadBrands() {
+        const snapshot = await db.collection('brands').get();
+        const container = document.getElementById('brandsList');
+        container.innerHTML = snapshot.docs.map(doc => {
+            const b = doc.data();
+            return `
+                <div class="item-card">
+                    <div style="display:flex;align-items:center;gap:0.8rem;">
+                        ${b.imageUrl ? `<img src="${b.imageUrl}" style="width:40px;height:40px;border-radius:50%;">` : '<i class="fas fa-store"></i>'}
+                        <span><strong>${b.name}</strong></span>
+                    </div>
+                    <div><button class="btn btn-danger" onclick="deleteBrand('${doc.id}')"><i class="fas fa-trash"></i></button></div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    async function deleteBrand(id) {
+        if (confirm('هل أنت متأكد من حذف هذا البراند؟')) {
+            await db.collection('brands').doc(id).delete();
+            loadBrands();
+            loadBrandSelects();
+        }
+    }
+
+    // ===== التبويبات =====
+    function showTab(tab) {
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        const map = { products: 'productsTab', categories: 'categoriesTab', brands: 'brandsTab' };
+        document.getElementById(map[tab]).classList.add('active');
+        document.querySelectorAll('.tab-btn').forEach((b, i) => { if (i === ['products','categories','brands'].indexOf(tab)) b.classList.add('active'); });
+        if (tab === 'products') loadProducts();
+        if (tab === 'categories') loadCategories();
+        if (tab === 'brands') loadBrands();
+    }
+
+    async function logout() { await auth.signOut(); window.location.href = 'admin.html'; }
+
+    window.deleteProduct = deleteProduct;
+    window.editProduct = editProduct;
+    window.addOffer = addOffer;
+    window.deleteCategory = deleteCategory;
+    window.deleteBrand = deleteBrand;
+    window.showTab = showTab;
+    window.logout = logout;
+    window.closeEditModal = closeEditModal;
+    window.generateAIDescription = generateAIDescription;
+</script>
+
+</body>
+</html>

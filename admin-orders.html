@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الطلبات | أولاد شعلان</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Tajawal', sans-serif; background: #f0f2f5; }
+        :root {
+            --sky-blue: #00B4D8;
+            --gold-dark: #B8860B;
+            --gold-light: #DAA520;
+            --dark-bg: #1a2a3a;
+            --shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+        .header {
+            background: var(--dark-bg);
+            color: white;
+            padding: 0.8rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .logo-img { height: 40px; width: auto; max-width: 140px; object-fit: contain; }
+        .logout-btn { background: #dc3545; color: white; border: none; padding: 0.4rem 1.2rem; border-radius: 25px; cursor: pointer; }
+        .container { padding: 1.5rem 5%; }
+        .back-link { display: inline-block; margin-bottom: 1rem; color: var(--sky-blue); text-decoration: none; }
+        .filters { background: white; padding: 1rem; border-radius: 15px; margin-bottom: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; box-shadow: var(--shadow); }
+        .filters select, .filters input { padding: 0.5rem 1rem; border: 1px solid #ddd; border-radius: 25px; font-family: inherit; }
+        .table-wrap { background: white; border-radius: 20px; overflow-x: auto; box-shadow: var(--shadow); }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 0.8rem 0.5rem; text-align: center; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+        th { background: var(--sky-blue); color: white; }
+        .status-badge { padding: 0.2rem 0.8rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+        .status-pending { background: #ffc107; color: #333; }
+        .status-confirmed { background: #17a2b8; color: white; }
+        .status-processing { background: #6f42c1; color: white; }
+        .status-shipped { background: #007bff; color: white; }
+        .status-delivered { background: #28a745; color: white; }
+        .status-cancelled { background: #dc3545; color: white; }
+        .btn-sm { padding: 0.3rem 0.7rem; border: none; border-radius: 5px; cursor: pointer; font-size: 0.8rem; }
+        .btn-view { background: var(--sky-blue); color: white; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-content { background: white; width: 95%; max-width: 600px; max-height: 90vh; border-radius: 25px; padding: 2rem; overflow-y: auto; }
+        .modal-close { float: left; cursor: pointer; font-size: 1.5rem; color: #999; }
+        .detail-item { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #eee; }
+        .btn-success { background: #28a745; color: white; border: none; padding: 0.6rem 1.5rem; border-radius: 30px; cursor: pointer; }
+        @media (max-width: 768px) {
+            .header { flex-direction: column; text-align: center; }
+            .filters { flex-direction: column; }
+            th, td { font-size: 0.7rem; padding: 0.4rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <img src="https://i.servimg.com/u/f54/18/11/62/61/tm/picsar12.png" alt="أولاد شعلان" class="logo-img">
+    <div><span style="color:var(--gold-light);">إدارة الطلبات</span> <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> خروج</button></div>
+</header>
+
+<div class="container">
+    <a href="admin-dashboard.html" class="back-link"><i class="fas fa-arrow-right"></i> العودة للوحة التحكم</a>
+
+    <div class="filters">
+        <select id="statusFilter" onchange="filterOrders()">
+            <option value="all">جميع الحالات</option>
+            <option value="قيد المراجعة">قيد المراجعة</option>
+            <option value="تم التأكيد">تم التأكيد</option>
+            <option value="جاري التجهيز">جاري التجهيز</option>
+            <option value="تم الشحن">تم الشحن</option>
+            <option value="تم التوصيل">تم التوصيل</option>
+            <option value="ملغي">ملغي</option>
+        </select>
+        <input type="text" id="searchInput" placeholder="🔍 بحث برقم التتبع أو الهاتف" onkeyup="filterOrders()">
+        <button onclick="resetFilters()" style="background:var(--gold-dark);color:white;border:none;padding:0.5rem 1.5rem;border-radius:25px;cursor:pointer;">إعادة تعيين</button>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>رقم التتبع</th><th>العميل</th><th>الهاتف</th><th>الإجمالي</th><th>الحالة</th><th>التاريخ</th><th>إجراء</th></tr></thead>
+            <tbody id="ordersBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- مودال تفاصيل الطلب -->
+<div id="orderModal" class="modal">
+    <div class="modal-content">
+        <span class="modal-close" onclick="closeModal()">&times;</span>
+        <h2><i class="fas fa-receipt"></i> تفاصيل الطلب</h2>
+        <div id="orderDetails"></div>
+        <div style="margin-top:1rem;">
+            <select id="newStatus" style="width:100%;padding:0.7rem;border:1px solid #ddd;border-radius:10px;font-family:inherit;">
+                <option value="قيد المراجعة">قيد المراجعة</option>
+                <option value="تم التأكيد">تم التأكيد</option>
+                <option value="جاري التجهيز">جاري التجهيز</option>
+                <option value="تم الشحن">تم الشحن</option>
+                <option value="تم التوصيل">تم التوصيل</option>
+                <option value="ملغي">ملغي</option>
+            </select>
+            <button onclick="updateStatus()" class="btn-success" style="width:100%;margin-top:0.5rem;"><i class="fas fa-save"></i> تحديث الحالة</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyD5tuzZf8VTqT2J8MSZ5zLnzbqRsT_lipA",
+        authDomain: "awlad-sh3lan-store.firebaseapp.com",
+        projectId: "awlad-sh3lan-store",
+        storageBucket: "awlad-sh3lan-store.firebasestorage.app",
+        messagingSenderId: "77191704198",
+        appId: "1:77191704198:web:d2ce184d9c8ec2e876eb07"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    let allOrders = [];
+    let currentOrderId = null;
+
+    auth.onAuthStateChanged(async (user) => {
+        if (!user) { window.location.href = 'admin.html'; return; }
+        const adminDoc = await db.collection('admins').doc(user.uid).get();
+        if (!adminDoc.exists) { await auth.signOut(); window.location.href = 'admin.html'; return; }
+        loadOrders();
+    });
+
+    async function loadOrders() {
+        const snapshot = await db.collection('orders').orderBy('createdAt', 'desc').get();
+        allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        filterOrders();
+    }
+
+    function filterOrders() {
+        const status = document.getElementById('statusFilter').value;
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        let filtered = allOrders;
+        if (status !== 'all') filtered = filtered.filter(o => o.status === status);
+        if (search) filtered = filtered.filter(o => o.trackingCode?.toLowerCase().includes(search) || o.phone?.includes(search));
+        displayOrders(filtered);
+    }
+
+    function displayOrders(orders) {
+        const tbody = document.getElementById('ordersBody');
+        tbody.innerHTML = orders.map(o => `
+            <tr>
+                <td><strong>${o.trackingCode || '-'}</strong></td>
+                <td>${o.customerName || '-'}</td>
+                <td>${o.phone || '-'}</td>
+                <td>${o.totalAmount || 0} ج</td>
+                <td><span class="status-badge status-${getStatusClass(o.status)}">${o.status || 'قيد المراجعة'}</span></td>
+                <td>${o.createdAt ? new Date(o.createdAt).toLocaleDateString('ar') : '-'}</td>
+                <td><button class="btn-sm btn-view" onclick="viewOrder('${o.id}')"><i class="fas fa-eye"></i></button></td>
+            </tr>
+        `).join('');
+    }
+
+    function getStatusClass(s) {
+        const map = { 'قيد المراجعة':'pending','تم التأكيد':'confirmed','جاري التجهيز':'processing','تم الشحن':'shipped','تم التوصيل':'delivered','ملغي':'cancelled' };
+        return map[s] || 'pending';
+    }
+
+    async function viewOrder(id) {
+        currentOrderId = id;
+        const doc = await db.collection('orders').doc(id).get();
+        const o = doc.data();
+        const itemsHtml = o.items?.map(i => `<div class="detail-item"><span>${i.name}</span><span>${i.quantity} × ${i.price} = ${i.quantity*i.price} ج</span></div>`).join('') || '<p>لا توجد منتجات</p>';
+        document.getElementById('orderDetails').innerHTML = `
+            <div class="detail-item"><span>رقم التتبع</span><span><strong>${o.trackingCode}</strong></span></div>
+            <div class="detail-item"><span>العميل</span><span>${o.customerName}</span></div>
+            <div class="detail-item"><span>الهاتف</span><span>${o.phone}</span></div>
+            <div class="detail-item"><span>العنوان</span><span>${o.address || '-'}</span></div>
+            <div class="detail-item"><span>طريقة الدفع</span><span>${o.paymentMethod || '-'}</span></div>
+            <div class="detail-item"><span>التواصل</span><span>${o.contactMethod || '-'}</span></div>
+            <div style="margin:0.5rem 0;font-weight:700;">المنتجات:</div>
+            ${itemsHtml}
+            <div class="detail-item" style="font-weight:700;border-top:2px solid var(--gold-dark);margin-top:0.5rem;padding-top:0.5rem;"><span>الإجمالي</span><span>${o.totalAmount} جنيه</span></div>
+        `;
+        document.getElementById('newStatus').value = o.status || 'قيد المراجعة';
+        document.getElementById('orderModal').style.display = 'flex';
+    }
+
+    async function updateStatus() {
+        const newStatus = document.getElementById('newStatus').value;
+        await db.collection('orders').doc(currentOrderId).update({ status: newStatus, updatedAt: new Date().toISOString() });
+        alert('✅ تم تحديث حالة الطلب');
+        closeModal();
+        loadOrders();
+    }
+
+    function closeModal() { document.getElementById('orderModal').style.display = 'none'; currentOrderId = null; }
+    function resetFilters() { document.getElementById('statusFilter').value = 'all'; document.getElementById('searchInput').value = ''; filterOrders(); }
+
+    async function logout() { await auth.signOut(); window.location.href = 'admin.html'; }
+
+    window.filterOrders = filterOrders;
+    window.viewOrder = viewOrder;
+    window.updateStatus = updateStatus;
+    window.closeModal = closeModal;
+    window.resetFilters = resetFilters;
+    window.logout = logout;
+</script>
+
+</body>
+</html>

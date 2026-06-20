@@ -1,0 +1,196 @@
+<!DOCTYPE html><html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سياسة الشحن | أولاد شعلان</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Tajawal', sans-serif; background: #f0f2f5; }
+        :root {
+            --sky-blue: #00B4D8;
+            --gold-dark: #B8860B;
+            --gold-light: #DAA520;
+            --dark-bg: #1a2a3a;
+            --shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+        .header {
+            background: var(--dark-bg);
+            color: white;
+            padding: 0.8rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .logo-img { height: 40px; width: auto; max-width: 140px; object-fit: contain; }
+        .nav-links { display: flex; gap: 1.2rem; flex-wrap: wrap; align-items: center; }
+        .nav-links a { color: white; text-decoration: none; font-weight: 500; transition: all 0.3s; }
+        .nav-links a:hover { color: var(--gold-light); }
+
+        .container { padding: 2rem 5%; max-width: 900px; margin: 0 auto; }
+        .card { background: white; border-radius: 25px; padding: 2.5rem; box-shadow: var(--shadow); }
+        .card h1 { color: var(--gold-dark); font-size: 2rem; text-align: center; margin-bottom: 1.5rem; }
+        .card h3 { color: var(--sky-blue); margin: 1.5rem 0 0.5rem; }
+        .card p { line-height: 1.9; color: #444; margin-bottom: 0.8rem; }
+        .card ul { padding-right: 1.5rem; margin-bottom: 1rem; }
+        .card ul li { line-height: 1.8; color: #444; }
+        .card .note { background: #f9f9f9; padding: 1rem; border-radius: 15px; border-right: 4px solid var(--gold-dark); }
+
+        /* جدول أسعار الشحن حسب المنطقة */
+        .shipping-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.2rem 0;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        }
+        .shipping-table thead {
+            background: var(--dark-bg);
+            color: white;
+        }
+        .shipping-table th {
+            padding: 0.9rem 0.5rem;
+            font-size: 1rem;
+            font-weight: 700;
+            text-align: center;
+        }
+        .shipping-table td {
+            padding: 0.7rem 0.5rem;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+            background: white;
+        }
+        .shipping-table tbody tr:hover td {
+            background: #fafafa;
+        }
+        .shipping-table .price-badge {
+            background: var(--gold-light);
+            color: #1a2a3a;
+            font-weight: 800;
+            padding: 0.2rem 0.7rem;
+            border-radius: 40px;
+            display: inline-block;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+        .area-list {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #222;
+        }
+        .area-list i {
+            color: var(--sky-blue);
+            margin-left: 4px;
+            font-size: 0.75rem;
+        }
+
+        .footer { background: var(--dark-bg); color: white; padding: 2rem 5%; text-align: center; margin-top: 3rem; }
+
+        @media (max-width: 768px) {
+            .header { flex-direction: column; text-align: center; }
+            .card { padding: 1.5rem; }
+            .shipping-table th, .shipping-table td { font-size: 0.85rem; padding: 0.5rem 0.2rem; }
+            .area-list { font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <img src="https://i.servimg.com/u/f54/18/11/62/61/tm/picsar12.png" alt="أولاد شعلان" class="logo-img">
+    <div class="nav-links">
+        <a href="index.html"><i class="fas fa-home"></i> الرئيسية</a>
+        <a href="store.html"><i class="fas fa-store"></i> المتجر</a>
+        <a href="shipping-policy.html"><i class="fas fa-truck"></i> سياسة الشحن</a>
+        <a href="track-order.html"><i class="fas fa-truck-fast"></i> تتبع الطلب</a>
+    </div>
+</header>
+
+<div class="container">
+    <div class="card">
+        <h1><i class="fas fa-truck"></i> سياسة الشحن والتوصيل</h1>
+
+        <p>نحرص في <strong>متجر أولاد شعلان</strong> على توصيل طلباتكم بأسرع وقت وأفضل جودة.</p>
+
+        <h3>📍 مناطق التوصيل</h3>
+        <ul>
+            <li><strong>المحلة الكبرى</strong> - تغطية كاملة</li>
+            <li><strong>القرى المجاورة</strong> - حسب الاتفاق</li>
+        </ul>
+
+        <h3>⏱️ مدة التوصيل</h3>
+        <ul>
+            <li><strong>المحلة الكبرى</strong> - بحد أقصى 24 ساعة</li>
+            <li><strong>المدن المجاورة</strong> - بحد أقصى 24 ساعة</li>
+            <li><strong>باقي المحافظات</strong> - غير متاح حاليا </li>
+        </ul>
+
+        <h3>💰 تكاليف الشحن</h3>
+        <ul>
+            <li>الطلبات التي تصل عددها 7 منتجات و سعرها يتجاوز <strong>1000 جنيه</strong> → <strong>شحن مجاني</strong></li>
+            <li>الطلبات أقل من 7 منتجات و سعر أقل من 1000 جنيه سعرها حسب منطقتك</li>
+        </ul>
+
+        <!-- قسم أسعار الشحن حسب المنطقة -->
+        <h3><i class="fas fa-map-pin" style="color:var(--gold-dark);"></i> أسعار الشحن حسب المنطقة</h3>
+        <table class="shipping-table">
+            <thead>
+                <tr>
+                    <th>السعر</th>
+                    <th>المناطق</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="price-badge">25 ج.م</span></td>
+                    <td class="area-list">
+                        <i class="fas fa-circle"></i> الرجبي <i class="fas fa-circle"></i> أبو شاهين
+                    </td>
+                </tr>
+                <tr>
+                    <td><span class="price-badge">35 ج.م</span></td>
+                    <td class="area-list">
+                        <i class="fas fa-circle"></i> السبع بنات <i class="fas fa-circle"></i> الجمهورية <i class="fas fa-circle"></i> سكة زفتى <i class="fas fa-circle"></i> الشعبية <i class="fas fa-circle"></i> الشعراوي <i class="fas fa-circle"></i> العلو <i class="fas fa-circle"></i> الشون <i class="fas fa-circle"></i> المعهد الديني <i class="fas fa-circle"></i> شارع 10 <i class="fas fa-circle"></i> البندر <i class="fas fa-circle"></i> المشحمة <i class="fas fa-circle"></i> أبو راضي
+                    </td>
+                </tr>
+                <tr>
+                    <td><span class="price-badge">40 ج.م</span></td>
+                    <td class="area-list">
+                        <i class="fas fa-circle"></i> الزراعة <i class="fas fa-circle"></i> أبو علي
+                    </td>
+                </tr>
+                <tr>
+                    <td><span class="price-badge">50 ج.م</span></td>
+                    <td class="area-list">
+                        <i class="fas fa-circle"></i> كفر حجازي
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="note">
+            <p><i class="fas fa-info-circle" style="color:var(--gold-dark);"></i> <strong>ملاحظة:</strong> في حالة الدفع عند الاستلام، يرجى تجهيز المبلغ النقدي عند استلام الطلب.</p>
+ <p><i class="fas fa-info-circle" style="color:var(--gold-dark);"></i> <strong>ملاحظة:</strong> تحديد أسعار الشحن تكون عن طريق المندوب وليس من قبلنا </p>
+ <p><i class="fas fa-info-circle" style="color:var(--gold-dark);"></i> <strong>ملاحظة:</strong>تسعيرة الشحن تراعي البعد الجغرافي بين منزلك ومحلنا</p>
+<p><i class="fas fa-info-circle" style="color:var(--gold-dark);"></i> <strong>ملاحظة:</strong>تسعيرة الشحن تلك غير ثابتة وقد تتغير في أي لحظة حسب أسعار السوق وإرتفاع أو تقليل أسعار المحروقات</p>
+        </div>
+
+        <p style="font-size:0.85rem;color:#888;border-top:1px solid #eee;padding-top:1.5rem;margin-top:1rem;">
+            آخر تحديث: 17 يونيو 2026
+        </p>
+    </div>
+</div>
+
+<footer class="footer">
+    <p>© 2026 متجر أولاد شعلان - جميع الحقوق محفوظة</p>
+</footer>
+
+</body>
+</html>

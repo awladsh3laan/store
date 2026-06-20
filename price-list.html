@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عرض الأسعار | أولاد شعلان</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Tajawal', sans-serif; background: #f0f2f5; }
+        :root {
+            --sky-blue: #00B4D8;
+            --gold-dark: #B8860B;
+            --gold-light: #DAA520;
+            --dark-bg: #1a2a3a;
+            --shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+        .header {
+            background: var(--dark-bg);
+            color: white;
+            padding: 0.8rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .logo-img { height: 40px; width: auto; max-width: 140px; object-fit: contain; }
+        .nav-links { display: flex; gap: 1.2rem; flex-wrap: wrap; align-items: center; }
+        .nav-links a { color: white; text-decoration: none; font-weight: 500; transition: all 0.3s; }
+        .nav-links a:hover { color: var(--gold-light); }
+
+        .container { padding: 1.5rem 5%; max-width: 1200px; margin: 0 auto; }
+        .actions { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; justify-content: center; }
+        .btn { padding: 0.6rem 1.5rem; border: none; border-radius: 30px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
+        .btn-primary { background: var(--sky-blue); color: white; }
+        .btn-primary:hover { background: #0098b8; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #218838; }
+        .btn-warning { background: var(--gold-dark); color: white; }
+        .btn-warning:hover { background: #a0700a; }
+        .search-box { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1.5rem; }
+        .search-box input { padding: 0.7rem 1.5rem; border: 1px solid #ddd; border-radius: 30px; min-width: 250px; font-family: inherit; }
+
+        .table-wrap { background: white; border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 0.8rem; text-align: center; border-bottom: 1px solid #eee; }
+        th { background: var(--sky-blue); color: white; }
+        .total-row { background: #f9f9f9; font-weight: 700; }
+
+        .footer { background: var(--dark-bg); color: white; padding: 2rem 5%; text-align: center; margin-top: 3rem; }
+
+        @media print { .header, .actions, .search-box, .footer { display: none; } }
+        @media (max-width: 768px) {
+            .header { flex-direction: column; text-align: center; }
+            th, td { font-size: 0.75rem; padding: 0.4rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <img src="https://i.servimg.com/u/f54/18/11/62/61/tm/picsar12.png" alt="أولاد شعلان" class="logo-img">
+    <div class="nav-links">
+        <a href="index.html"><i class="fas fa-home"></i> الرئيسية</a>
+        <a href="store.html"><i class="fas fa-store"></i> المتجر</a>
+        <a href="price-list.html"><i class="fas fa-file-invoice-dollar"></i> عرض الأسعار</a>
+        <a href="track-order.html"><i class="fas fa-truck-fast"></i> تتبع الطلب</a>
+    </div>
+</header>
+
+<div class="container">
+    <h2 style="text-align:center;color:var(--gold-dark);margin-bottom:0.5rem;"><i class="fas fa-file-invoice-dollar"></i> عرض الأسعار</h2>
+    <p style="text-align:center;color:#666;margin-bottom:1.5rem;">قائمة أسعار منتجات متجر أولاد شعلان</p>
+
+    <div class="actions">
+        <button class="btn btn-warning" onclick="window.print()"><i class="fas fa-print"></i> طباعة</button>
+        <button class="btn btn-success" onclick="downloadPDF()"><i class="fas fa-file-pdf"></i> تحميل PDF</button>
+        <button class="btn btn-primary" onclick="exportExcel()"><i class="fas fa-file-excel"></i> تصدير Excel</button>
+    </div>
+
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="🔍 بحث في القائمة..." onkeyup="filterTable()">
+    </div>
+
+    <div class="table-wrap" id="priceTableWrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>المنتج</th>
+                    <th>التصنيف</th>
+                    <th>البراند</th>
+                    <th>السعر (ج)</th>
+                    <th>سعر العرض</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+            <tfoot id="tableFoot"></tfoot>
+        </table>
+        <div style="padding:1rem;text-align:center;color:#999;font-size:0.8rem;">
+            * الأسعار قابلة للتغيير حسب العروض والتخفيضات
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <p>© 2026 متجر أولاد شعلان - جميع الحقوق محفوظة</p>
+</footer>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyD5tuzZf8VTqT2J8MSZ5zLnzbqRsT_lipA",
+        authDomain: "awlad-sh3lan-store.firebaseapp.com",
+        projectId: "awlad-sh3lan-store",
+        storageBucket: "awlad-sh3lan-store.firebasestorage.app",
+        messagingSenderId: "77191704198",
+        appId: "1:77191704198:web:d2ce184d9c8ec2e876eb07"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let allProducts = [];
+    let categoriesMap = {};
+    let brandsMap = {};
+
+    async function loadData() {
+        const catSnap = await db.collection('categories').get();
+        catSnap.forEach(d => { categoriesMap[d.id] = d.data().name; });
+
+        const brandSnap = await db.collection('brands').get();
+        brandSnap.forEach(d => { brandsMap[d.id] = d.data().name; });
+
+        const prodSnap = await db.collection('products').get();
+        allProducts = prodSnap.docs.map(d => ({
+            id: d.id,
+            ...d.data(),
+            categoryName: categoriesMap[d.data().categoryId] || '-',
+            brandName: brandsMap[d.data().brandId] || '-'
+        }));
+
+        renderTable(allProducts);
+    }
+
+    function renderTable(products) {
+        const tbody = document.getElementById('tableBody');
+        const tfoot = document.getElementById('tableFoot');
+
+        if (products.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="padding:2rem;color:#999;">لا توجد منتجات</td></tr>';
+            tfoot.innerHTML = '';
+            return;
+        }
+
+        let total = 0;
+        tbody.innerHTML = products.map((p, i) => {
+            const price = p.discountPrice || p.price;
+            total += price;
+            return `<tr>
+                <td>${i + 1}</td>
+                <td>${p.name}</td>
+                <td>${p.categoryName}</td>
+                <td>${p.brandName}</td>
+                <td><strong>${p.price}</strong></td>
+                <td>${p.discountPrice ? `<span style="color:#28a745;font-weight:700;">${p.discountPrice}</span>` : '-'}</td>
+            </tr>`;
+        }).join('');
+
+        tfoot.innerHTML = `
+            <tr class="total-row">
+                <td colspan="4" style="text-align:left;">الإجمالي</td>
+                <td colspan="2">${total.toFixed(2)} جنيه</td>
+            </tr>
+            <tr>
+                <td colspan="6" style="text-align:center;font-size:0.8rem;color:#888;">
+                    عدد المنتجات المعروضة: ${products.length}
+                </td>
+            </tr>
+        `;
+    }
+
+    function filterTable() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const filtered = allProducts.filter(p =>
+            p.name?.toLowerCase().includes(search) ||
+            p.categoryName?.toLowerCase().includes(search) ||
+            p.brandName?.toLowerCase().includes(search)
+        );
+        renderTable(filtered);
+    }
+
+    function downloadPDF() {
+        const el = document.getElementById('priceTableWrap');
+        html2pdf().from(el).save(`price-list-${new Date().toISOString().slice(0,10)}.pdf`);
+    }
+
+    function exportExcel() {
+        let csv = "الرقم,المنتج,التصنيف,البراند,السعر,سعر العرض\n";
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const filtered = search ? allProducts.filter(p => p.name?.toLowerCase().includes(search)) : allProducts;
+        filtered.forEach((p, i) => {
+            csv += `${i+1},"${p.name}","${p.categoryName}","${p.brandName}",${p.price},${p.discountPrice || ''}\n`;
+        });
+        const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `price-list-${new Date().toISOString().slice(0,10)}.csv`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+    }
+
+    loadData();
+    window.filterTable = filterTable;
+    window.downloadPDF = downloadPDF;
+    window.exportExcel = exportExcel;
+</script>
+
+</body>
+</html>

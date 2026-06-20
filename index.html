@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أولاد شعلان | المنظفات والورقيات</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        /* ===== إعادة تعيين ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8edf2 100%);
+            color: #1a2a3a;
+        }
+
+        :root {
+            --sky-blue: #00B4D8;
+            --gold-dark: #B8860B;
+            --gold-light: #DAA520;
+            --green-light: #90E0EF;
+            --dark-bg: #1a2a3a;
+            --white: #ffffff;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        /* ===== الهيدر ===== */
+        .header {
+            background: var(--dark-bg);
+            color: white;
+            padding: 0.8rem 5%;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-img {
+            height: 45px;
+            width: auto;
+            max-width: 150px;
+            object-fit: contain;
+        }
+
+        .logo-text {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--gold-light);
+        }
+
+        .logo-text span {
+            color: var(--sky-blue);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.2rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .nav-links a:hover {
+            color: var(--gold-light);
+        }
+
+        .user-icon {
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: var(--gold-light);
+            transition: var(--transition);
+        }
+
+        .user-icon:hover {
+            color: var(--sky-blue);
+            transform: scale(1.1);
+        }
+
+        /* ===== قسم التميمة ===== */
+        .hero-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 2rem 5%;
+            gap: 2rem;
+            flex-wrap: wrap;
+            background: linear-gradient(135deg, var(--sky-blue), var(--green-light));
+            margin: 0 0 1.5rem 0;
+            border-radius: 0 0 30px 30px;
+        }
+
+        .hero-text {
+            flex: 1;
+            min-width: 250px;
+            color: white;
+        }
+
+        .hero-text h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero-text p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            line-height: 1.8;
+        }
+
+        .hero-image {
+            flex: 0 0 auto;
+            text-align: center;
+        }
+
+        .hero-image img {
+            max-width: 250px;
+            width: 100%;
+            height: auto;
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.2));
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        /* ===== الكروت الرئيسية ===== */
+        .cards-section {
+            padding: 1.5rem 5%;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-icon {
+            font-size: 2.5rem;
+            color: var(--sky-blue);
+            margin-bottom: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .card:hover .card-icon {
+            color: var(--gold-dark);
+            transform: scale(1.1);
+        }
+
+        .card-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--dark-bg);
+        }
+
+        /* ===== انزلاق شرح الكارت ===== */
+        .card-desc {
+            position: absolute;
+            bottom: -100%;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, var(--sky-blue), var(--green-light));
+            color: white;
+            padding: 1rem;
+            font-size: 0.8rem;
+            border-radius: 0 0 20px 20px;
+            transition: bottom 0.4s ease;
+            line-height: 1.6;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card:hover .card-desc {
+            bottom: 0;
+        }
+
+        /* ===== الكروت الثانوية ===== */
+        .secondary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .secondary-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.2rem 1rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .secondary-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        .secondary-card .card-icon {
+            font-size: 1.8rem;
+            color: var(--gold-dark);
+        }
+
+        .secondary-card .card-title {
+            font-size: 1rem;
+        }
+
+        .secondary-card .card-desc {
+            font-size: 0.7rem;
+            padding: 0.8rem;
+            min-height: 55px;
+        }
+
+        /* ===== الفوتر ===== */
+        .footer {
+            background: var(--dark-bg);
+            color: white;
+            padding: 2.5rem 5% 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-section h3 {
+            color: var(--gold-light);
+            margin-bottom: 0.8rem;
+            font-size: 1.1rem;
+        }
+
+        .footer-section p,
+        .footer-section a {
+            color: #ccc;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            text-decoration: none;
+            display: block;
+            transition: var(--transition);
+        }
+
+        .footer-section a:hover {
+            color: var(--gold-light);
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .footer-social a {
+            font-size: 1.5rem;
+            color: #ccc;
+            transition: var(--transition);
+        }
+
+        .footer-social a:hover {
+            color: var(--gold-light);
+            transform: scale(1.1);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid #444;
+            font-size: 0.85rem;
+            color: #999;
+        }
+
+        .footer-bottom strong {
+            color: var(--gold-light);
+        }
+
+        /* ===== التجاوب ===== */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                text-align: center;
+                padding: 0.5rem 3%;
+            }
+            .hero-section {
+                flex-direction: column;
+                text-align: center;
+                padding: 1.5rem 3%;
+            }
+            .hero-text h1 {
+                font-size: 1.6rem;
+            }
+            .hero-image img {
+                max-width: 160px;
+            }
+            .cards-grid {
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                gap: 1rem;
+            }
+            .secondary-cards {
+                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            }
+            .footer-grid {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            .footer-social {
+                justify-content: center;
+            }
+            .nav-links {
+                justify-content: center;
+                gap: 0.8rem;
+            }
+            .nav-links a {
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .cards-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.8rem;
+            }
+            .card {
+                padding: 1rem 0.5rem;
+            }
+            .card-icon {
+                font-size: 1.8rem;
+            }
+            .card-title {
+                font-size: 0.85rem;
+            }
+            .hero-text h1 {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== الهيدر ===== -->
+    <header class="header">
+        <div class="logo-container">
+            <img src="https://i.servimg.com/u/f54/18/11/62/61/tm/picsar12.png" alt="أولاد شعلان" class="logo-img">
+        </div>
+        <div class="nav-links">
+            <a href="index.html"><i class="fas fa-home"></i> الرئيسية</a>
+            <a href="store.html"><i class="fas fa-store"></i> المتجر</a>
+            <a href="price-list.html"><i class="fas fa-file-invoice-dollar"></i> عرض الأسعار</a>
+            <a href="track-order.html"><i class="fas fa-truck-fast"></i> تتبع الطلب</a>
+            <a href="admin.html" class="user-icon" title="لوحة التحكم"><i class="fas fa-user-shield"></i></a>
+        </div>
+    </header>
+
+    <!-- ===== قسم التميمة ===== -->
+    <section class="hero-section">
+        <div class="hero-text">
+            <h1>مرحباً بك في <span style="color:var(--gold-light);">أولاد شعلان</span></h1>
+            <p>
+                أولاد شعلان هو محل أو متجر لبيع المنظفات المنزلية و بعض منتجات الورقيات و بعض منتجات العناية الشخصية 
+                وبعض منتجات المبيدات الحشرية، و خبرة في مجال المنظفات لأكثر من 12 سنة.
+            </p>
+        </div>
+        <div class="hero-image">
+            <img src="https://i.ibb.co/sdhnY5Gf/Picsart-26-06-17-06-04-07-109.png" alt="تميمة أولاد شعلان">
+        </div>
+    </section>
+
+    <!-- ===== الكروت الرئيسية ===== -->
+    <section class="cards-section">
+        <div class="cards-grid">
+
+            <!-- كارت الرئيسية -->
+            <a href="index.html" class="card">
+                <div class="card-icon"><i class="fas fa-house-chimney"></i></div>
+                <div class="card-title">الرئيسية</div>
+                <div class="card-desc">المركز الرئيسي لمتجر أولاد شعلان</div>
+            </a>
+
+            <!-- كارت المتجر -->
+            <a href="store.html" class="card">
+                <div class="card-icon"><i class="fas fa-store"></i></div>
+                <div class="card-title">المتجر</div>
+                <div class="card-desc">تصفح المنتجات، أضف للمفضلة، واطلب بسهولة</div>
+            </a>
+
+            <!-- كارت عرض الأسعار -->
+            <a href="price-list.html" class="card">
+                <div class="card-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+                <div class="card-title">عرض الأسعار</div>
+                <div class="card-desc">إنشاء عرض أسعار لمجموعة من المنتجات</div>
+            </a>
+
+            <!-- كارت تتبع الطلب -->
+            <a href="track-order.html" class="card">
+                <div class="card-icon"><i class="fas fa-truck-fast"></i></div>
+                <div class="card-title">تتبع الطلب</div>
+                <div class="card-desc">متابعة تحديث طلبك فور إنشائه</div>
+            </a>
+
+            <!-- كارت لوحة التحكم -->
+            <a href="admin.html" class="card">
+                <div class="card-icon"><i class="fas fa-user-shield"></i></div>
+                <div class="card-title">لوحة التحكم</div>
+                <div class="card-desc">دخول المسئولين لإدارة المتجر</div>
+            </a>
+
+            <!-- كارت الألعاب -->
+            <a href="play.html" class="card">
+                <div class="card-icon"><i class="fas fa-gamepad"></i></div>
+                <div class="card-title">الألعاب والمسابقات</div>
+                <div class="card-desc">شارك في المسابقات واربح جوائز قيمة</div>
+            </a>
+
+        </div>
+
+        <!-- ===== الكروت الثانوية ===== -->
+        <div class="secondary-cards">
+            <a href="about.html" class="secondary-card">
+                <div class="card-icon"><i class="fas fa-users"></i></div>
+                <div class="card-title">من نحن</div>
+                <div class="card-desc">تعرف على متجر أولاد شعلان</div>
+            </a>
+            <a href="privacy.html" class="secondary-card">
+                <div class="card-icon"><i class="fas fa-shield-halved"></i></div>
+                <div class="card-title">سياسة الخصوصية</div>
+                <div class="card-desc">كيف نحمي بياناتك</div>
+            </a>
+            <a href="shipping-policy.html" class="secondary-card">
+                <div class="card-icon"><i class="fas fa-truck"></i></div>
+                <div class="card-title">سياسة الشحن</div>
+                <div class="card-desc">شروط وأحكام الشحن والتوصيل</div>
+            </a>
+            <a href="return-policy.html" class="secondary-card">
+                <div class="card-icon"><i class="fas fa-rotate-left"></i></div>
+                <div class="card-title">سياسة الاستبدال والاسترجاع</div>
+                <div class="card-desc">شروط استبدال واسترجاع المنتجات</div>
+            </a>
+        </div>
+    </section>
+
+    <!-- ===== الفوتر ===== -->
+    <footer class="footer">
+        <div class="footer-grid">
+            <div class="footer-section">
+                <h3>📍 عنوان المحل</h3>
+                <p>المحلة الكبرى - ميدان طلعت حرب على سور سكة القطار بعد مستشفى المبرة - مقابل ميدان طلعت حرب موقف الاتوبيسات سابقاً</p>
+            </div>
+            <div class="footer-section">
+                <h3>روابط سريعة</h3>
+                <a href="about.html">من نحن</a>
+                <a href="privacy.html">سياسة الخصوصية</a>
+                <a href="shipping-policy.html">سياسة الشحن</a>
+                <a href="return-policy.html">سياسة الاستبدال والاسترجاع</a>
+            </div>
+            <div class="footer-section">
+                <h3>تواصل معنا</h3>
+                <div class="footer-social">
+                    <a href="#" target="_blank"><i class="fab fa-facebook"></i></a>
+                    <a href="#" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            تم إنشاء و تطوير هذا الموقع كاملاً بواسطة <strong>FAMO ELWAN</strong> &copy; 2026
+        </div>
+    </footer>
+
+    <script>
+        // ===== إعدادات Firebase =====
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5tuzZf8VTqT2J8MSZ5zLnzbqRsT_lipA",
+            authDomain: "awlad-sh3lan-store.firebaseapp.com",
+            projectId: "awlad-sh3lan-store",
+            storageBucket: "awlad-sh3lan-store.firebasestorage.app",
+            messagingSenderId: "77191704198",
+            appId: "1:77191704198:web:d2ce184d9c8ec2e876eb07"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // ===== التحقق من حالة تسجيل دخول المدير =====
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // إذا كان المستخدم مسجلاً، نتحقق من صلاحياته
+                db.collection('admins').doc(user.uid).get().then(doc => {
+                    if (doc.exists) {
+                        // المستخدم أدمن - نغير أيقونة المستخدم
+                        document.querySelector('.user-icon').innerHTML = '<i class="fas fa-check-circle" style="color:#28a745;"></i>';
+                    }
+                });
+            }
+        });
+
+        console.log('✅ متجر أولاد شعلان يعمل بنجاح!');
+    </script>
+
+</body>
+</html>

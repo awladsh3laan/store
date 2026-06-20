@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة المسئولين | أولاد شعلان</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Tajawal', sans-serif; background: #f0f2f5; }
+        :root {
+            --sky-blue: #00B4D8;
+            --gold-dark: #B8860B;
+            --gold-light: #DAA520;
+            --dark-bg: #1a2a3a;
+            --shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+        .header {
+            background: var(--dark-bg);
+            color: white;
+            padding: 0.8rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .logo-img { height: 40px; width: auto; max-width: 140px; object-fit: contain; }
+        .logout-btn { background: #dc3545; color: white; border: none; padding: 0.4rem 1.2rem; border-radius: 25px; cursor: pointer; }
+        .container { padding: 1.5rem 5%; }
+        .back-link { display: inline-block; margin-bottom: 1rem; color: var(--sky-blue); text-decoration: none; }
+        .card { background: white; padding: 1.5rem; border-radius: 20px; box-shadow: var(--shadow); margin-bottom: 1.5rem; }
+        .card h3 { color: var(--gold-dark); margin-bottom: 1rem; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .form-grid input { width: 100%; padding: 0.7rem; border: 1px solid #ddd; border-radius: 10px; font-family: inherit; }
+        .form-grid .full { grid-column: 1 / -1; }
+        .btn { padding: 0.7rem 1.5rem; border: none; border-radius: 30px; cursor: pointer; font-weight: 600; }
+        .btn-primary { background: var(--sky-blue); color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-sm { padding: 0.2rem 0.8rem; border: none; border-radius: 5px; cursor: pointer; font-size: 0.8rem; }
+        .admin-item { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem; border-bottom: 1px solid #eee; flex-wrap: wrap; }
+        @media (max-width: 768px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .header { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <img src="https://i.servimg.com/u/f54/18/11/62/61/tm/picsar12.png" alt="أولاد شعلان" class="logo-img">
+    <div><span style="color:var(--gold-light);">إدارة المسئولين</span> <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> خروج</button></div>
+</header>
+
+<div class="container">
+    <a href="admin-dashboard.html" class="back-link"><i class="fas fa-arrow-right"></i> العودة للوحة التحكم</a>
+
+    <div class="card">
+        <h3><i class="fas fa-user-plus"></i> إضافة مسئول جديد</h3>
+        <p style="color:#666;font-size:0.9rem;margin-bottom:1rem;">أضف بريداً إلكترونياً لمنحه صلاحيات الوصول للوحة التحكم</p>
+        <form id="adminForm" class="form-grid">
+            <input type="email" id="adminEmail" placeholder="البريد الإلكتروني للمسئول" required>
+            <div class="full"><button type="submit" class="btn btn-primary"><i class="fas fa-user-shield"></i> إضافة مسئول</button></div>
+        </form>
+    </div>
+
+    <div class="card">
+        <h3><i class="fas fa-users"></i> قائمة المسئولين الحاليين</h3>
+        <div id="adminsList"></div>
+    </div>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyD5tuzZf8VTqT2J8MSZ5zLnzbqRsT_lipA",
+        authDomain: "awlad-sh3lan-store.firebaseapp.com",
+        projectId: "awlad-sh3lan-store",
+        storageBucket: "awlad-sh3lan-store.firebasestorage.app",
+        messagingSenderId: "77191704198",
+        appId: "1:77191704198:web:d2ce184d9c8ec2e876eb07"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    let currentUser = null;
+
+    auth.onAuthStateChanged(async (user) => {
+        if (!user) { window.location.href = 'admin.html'; return; }
+        const adminDoc = await db.collection('admins').doc(user.uid).get();
+        if (!adminDoc.exists) { await auth.signOut(); window.location.href = 'admin.html'; return; }
+        currentUser = user;
+        loadAdmins();
+    });
+
+    document.getElementById('adminForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('adminEmail').value.trim();
+        if (!email) return;
+
+        try {
+            // البحث عن المستخدم بالبريد الإلكتروني
+            const userQuery = await db.collection('users').where('email', '==', email).get();
+            let uid = null;
+
+            if (userQuery.empty) {
+                // إذا لم يكن مسجلاً، نقوم بإنشاء حساب مؤقت (يتطلب تفعيل)
+                const userCred = await auth.createUserWithEmailAndPassword(email, '123456789');
+                uid = userCred.user.uid;
+                await userCred.user.sendEmailVerification();
+            } else {
+                uid = userQuery.docs[0].id;
+            }
+
+            // إضافة المستخدم إلى مجموعة الأدمن
+            await db.collection('admins').doc(uid).set({
+                email: email,
+                role: 'admin',
+                createdAt: new Date().toISOString(),
+                addedBy: currentUser?.email || 'unknown'
+            });
+
+            alert(`✅ تم إضافة ${email} كمسئول. كلمة المرور المؤقتة: 123456789`);
+            document.getElementById('adminForm').reset();
+            loadAdmins();
+        } catch (error) {
+            alert('❌ حدث خطأ: ' + error.message);
+        }
+    });
+
+    async function loadAdmins() {
+        const snapshot = await db.collection('admins').get();
+        const container = document.getElementById('adminsList');
+        container.innerHTML = snapshot.docs.map(doc => {
+            const a = doc.data();
+            return `
+                <div class="admin-item">
+                    <span><i class="fas fa-user-shield" style="color:var(--gold-dark);"></i> ${a.email}</span>
+                    <span><small style="color:#999;">${a.createdAt ? new Date(a.createdAt).toLocaleDateString('ar') : ''}</small>
+                    ${doc.id !== currentUser?.uid ? `<button class="btn-sm btn-danger" onclick="removeAdmin('${doc.id}')"><i class="fas fa-trash"></i></button>` : '<span style="color:var(--sky-blue);font-size:0.8rem;">(أنت)</span>'}</span>
+                </div>
+            `;
+        }).join('');
+    }
+
+    async function removeAdmin(id) {
+        if (confirm('هل أنت متأكد من إزالة هذا المسئول؟')) {
+            await db.collection('admins').doc(id).delete();
+            loadAdmins();
+        }
+    }
+
+    async function logout() { await auth.signOut(); window.location.href = 'admin.html'; }
+
+    window.removeAdmin = removeAdmin;
+    window.logout = logout;
+</script>
+
+</body>
+</html>

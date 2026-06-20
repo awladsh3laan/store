@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول | لوحة التحكم</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, #00B4D8, #90E0EF);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        :root {
+            --sky-blue: #00B4D8;
+            --gold-dark: #B8860B;
+            --gold-light: #DAA520;
+            --dark-bg: #1a2a3a;
+            --shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+        }
+
+        .login-container {
+            background: white;
+            padding: 2.5rem 2rem;
+            border-radius: 30px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+        }
+
+        .logo-img {
+            max-width: 180px;
+            height: auto;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-title {
+            font-size: 1.5rem;
+            color: var(--dark-bg);
+            margin-bottom: 0.3rem;
+        }
+
+        .login-subtitle {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .input-group i {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 1rem;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 0.9rem 2.8rem 0.9rem 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 50px;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            background: #f9f9f9;
+        }
+
+        .input-group input:focus {
+            border-color: var(--sky-blue);
+            outline: none;
+            background: white;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 0.9rem;
+            background: linear-gradient(135deg, var(--sky-blue), var(--gold-light));
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-top: 0.5rem;
+        }
+
+        .login-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(0, 180, 216, 0.4);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .error-msg {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-top: 0.8rem;
+            min-height: 1.5rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 1.2rem;
+            color: #666;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: var(--sky-blue);
+        }
+
+        .back-link i {
+            margin-left: 0.3rem;
+        }
+
+        .device-info {
+            font-size: 0.7rem;
+            color: #999;
+            margin-top: 0.8rem;
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 2rem 1.2rem;
+            }
+            .logo-img {
+                max-width: 140px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <img src="https://i.servimg.com/u/f54/18/11/62/61/tm/picsar12.png" alt="أولاد شعلان" class="logo-img">
+        <h1 class="login-title">🔐 تسجيل الدخول</h1>
+        <p class="login-subtitle">لوحة تحكم المسئولين</p>
+
+        <div class="input-group">
+            <i class="fas fa-envelope"></i>
+            <input type="email" id="email" placeholder="البريد الإلكتروني" autocomplete="email">
+        </div>
+
+        <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="password" placeholder="كلمة المرور" autocomplete="current-password">
+        </div>
+
+        <button class="login-btn" id="loginBtn" onclick="login()">
+            <i class="fas fa-sign-in-alt"></i> دخول
+        </button>
+
+        <div id="errorMsg" class="error-msg"></div>
+
+        <a href="index.html" class="back-link"><i class="fas fa-arrow-right"></i> العودة للمتجر</a>
+
+        <div class="device-info">
+            <i class="fas fa-shield-alt"></i> تسجيل دخول آمن من جهازك
+        </div>
+    </div>
+
+    <script>
+        // ===== إعدادات Firebase =====
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5tuzZf8VTqT2J8MSZ5zLnzbqRsT_lipA",
+            authDomain: "awlad-sh3lan-store.firebaseapp.com",
+            projectId: "awlad-sh3lan-store",
+            storageBucket: "awlad-sh3lan-store.firebasestorage.app",
+            messagingSenderId: "77191704198",
+            appId: "1:77191704198:web:d2ce184d9c8ec2e876eb07"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // متغيرات تتبع المحاولات
+        let failedAttempts = 0;
+        const MAX_ATTEMPTS = 5;
+        let isLocked = false;
+
+        // ===== التحقق من جلسة سابقة =====
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                // التحقق من صلاحيات الأدمن
+                const adminDoc = await db.collection('admins').doc(user.uid).get();
+                if (adminDoc.exists) {
+                    // تسجيل الدخول التلقائي
+                    window.location.href = 'admin-dashboard.html';
+                } else {
+                    await auth.signOut();
+                }
+            }
+        });
+
+        // ===== دالة تسجيل الدخول =====
+        async function login() {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('errorMsg');
+            const loginBtn = document.getElementById('loginBtn');
+
+            // التحقق من القفل
+            if (isLocked) {
+                errorDiv.innerText = '⛔ تم قفل الدخول مؤقتاً. حاول لاحقاً.';
+                return;
+            }
+
+            // التحقق من الحقول
+            if (!email || !password) {
+                errorDiv.innerText = '⚠️ الرجاء إدخال البريد الإلكتروني وكلمة المرور';
+                return;
+            }
+
+            // تعطيل الزر أثناء المعالجة
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحقق...';
+            errorDiv.innerText = '';
+
+            try {
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                const uid = userCredential.user.uid;
+
+                // التحقق من صلاحيات الأدمن
+                const adminDoc = await db.collection('admins').doc(uid).get();
+
+                if (adminDoc.exists) {
+                    // تسجيل ناجح - إعادة تعيين المحاولات الفاشلة
+                    failedAttempts = 0;
+                    
+                    // تسجيل جهاز الدخول (للميزات المستقبلية)
+                    const deviceData = {
+                        lastLogin: new Date().toISOString(),
+                        userAgent: navigator.userAgent,
+                        platform: navigator.platform
+                    };
+                    await db.collection('admins').doc(uid).update({
+                        lastLogin: deviceData.lastLogin,
+                        deviceInfo: deviceData
+                    }).catch(() => {}); // تجاهل الأخطاء في حالة عدم وجود الحقل
+
+                    // التوجيه إلى لوحة التحكم
+                    window.location.href = 'admin-dashboard.html';
+                } else {
+                    // المستخدم ليس أدمن
+                    await auth.signOut();
+                    errorDiv.innerText = '⛔ ليس لديك صلاحيات الوصول للوحة التحكم';
+                    failedAttempts++;
+                    checkLockout();
+                }
+
+            } catch (error) {
+                console.error('خطأ في تسجيل الدخول:', error);
+                failedAttempts++;
+                checkLockout();
+
+                // رسائل خطأ مخصصة
+                if (error.code === 'auth/user-not-found') {
+                    errorDiv.innerText = '❌ البريد الإلكتروني غير مسجل';
+                } else if (error.code === 'auth/wrong-password') {
+                    errorDiv.innerText = '❌ كلمة المرور غير صحيحة';
+                } else if (error.code === 'auth/too-many-requests') {
+                    errorDiv.innerText = '⛔ محاولات كثيرة جداً. حاول لاحقاً.';
+                    isLocked = true;
+                    setTimeout(() => { isLocked = false; }, 60000); // قفل لمدة دقيقة
+                } else {
+                    errorDiv.innerText = '❌ حدث خطأ: ' + error.message;
+                }
+            }
+
+            // إعادة تفعيل الزر
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> دخول';
+        }
+
+        // ===== التحقق من عدد المحاولات الفاشلة =====
+        function checkLockout() {
+            if (failedAttempts >= MAX_ATTEMPTS) {
+                isLocked = true;
+                document.getElementById('errorMsg').innerText = '⛔ تم قفل الدخول بسبب كثرة المحاولات الفاشلة. حاول بعد 5 دقائق.';
+                setTimeout(() => {
+                    isLocked = false;
+                    failedAttempts = 0;
+                    document.getElementById('errorMsg').innerText = '✅ تم إلغاء القفل. يمكنك المحاولة مرة أخرى.';
+                }, 300000); // 5 دقائق
+            }
+        }
+
+        // ===== السماح بالدخول بضغط Enter =====
+        document.getElementById('password').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') login();
+        });
+        document.getElementById('email').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') document.getElementById('password').focus();
+        });
+
+        // ===== تصدير الدالة للاستخدام العالمي =====
+        window.login = login;
+    </script>
+
+</body>
+</html>

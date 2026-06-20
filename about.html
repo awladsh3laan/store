@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>من نحن | أولاد شعلان</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Tajawal', sans-serif; background: #f0f2f5; }
+        :root {
+            --sky-blue: #00B4D8;
+            --gold-dark: #B8860B;
+            --gold-light: #DAA520;
+            --dark-bg: #1a2a3a;
+            --shadow: 0 8px 25px rgba(0,0,0,0.08);
+            --transition: all 0.3s ease;
+        }
+        .header {
+            background: var(--dark-bg);
+            color: white;
+            padding: 0.8rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .logo-img { height: 40px; width: auto; max-width: 140px; object-fit: contain; }
+        .nav-links { display: flex; gap: 1.2rem; flex-wrap: wrap; align-items: center; }
+        .nav-links a { color: white; text-decoration: none; font-weight: 500; transition: var(--transition); }
+        .nav-links a:hover { color: var(--gold-light); }
+
+        .container { padding: 2rem 5%; max-width: 900px; margin: 0 auto; }
+        .card { background: white; border-radius: 25px; padding: 2.5rem; box-shadow: var(--shadow); }
+        .card h1 { color: var(--gold-dark); font-size: 2rem; text-align: center; margin-bottom: 0.5rem; }
+        .card .sub { text-align: center; color: #666; font-size: 1.1rem; margin-bottom: 2rem; }
+        .card p { font-size: 1.05rem; line-height: 1.9; color: #444; margin-bottom: 1.2rem; }
+        .card .highlight { color: var(--sky-blue); font-weight: 700; }
+        .values { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 1.5rem; margin: 2rem 0; }
+        .value-item { text-align: center; padding: 1.5rem; background: #f9f9f9; border-radius: 15px; }
+        .value-item i { font-size: 2.5rem; color: var(--gold-dark); margin-bottom: 0.5rem; }
+        .value-item h4 { color: var(--dark-bg); }
+
+        .footer { background: var(--dark-bg); color: white; padding: 2rem 5%; text-align: center; margin-top: 3rem; }
+
+        @media (max-width: 768px) {
+            .header { flex-direction: column; text-align: center; }
+            .card { padding: 1.5rem; }
+            .values { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <img src="https://i.servimg.com/u/f54/18/11/62/61/tm/picsar12.png" alt="أولاد شعلان" class="logo-img">
+    <div class="nav-links">
+        <a href="index.html"><i class="fas fa-home"></i> الرئيسية</a>
+        <a href="store.html"><i class="fas fa-store"></i> المتجر</a>
+        <a href="about.html"><i class="fas fa-users"></i> من نحن</a>
+        <a href="track-order.html"><i class="fas fa-truck-fast"></i> تتبع الطلب</a>
+    </div>
+</header>
+
+<div class="container">
+    <div class="card">
+        <h1>🌟 من نحن</h1>
+        <p class="sub">قصة متجر أولاد شعلان</p>
+
+        <p>
+            <span class="highlight">أولاد شعلان</span> هو متجر متخصص في بيع <span class="highlight">المنظفات المنزلية</span>، 
+            <span class="highlight">الورقيات</span>، <span class="highlight">منتجات العناية الشخصية</span>، 
+            و <span class="highlight">المبيدات الحشرية</span>.
+        </p>
+
+        <p>
+            تأسس متجرنا منذ أكثر من <span class="highlight">12 عاماً</span> من الخبرة في مجال المنظفات، 
+            ونفتخر بتقديم منتجات عالية الجودة لعملائنا الكرام.
+        </p>
+
+        <p>
+            نؤمن بأن <span class="highlight">جودة المنتج</span> و <span class="highlight">رضا العميل</span> هما أساس نجاحنا، 
+            ولذلك نحرص على اختيار أفضل العلامات التجارية وتقديمها بأسعار تنافسية.
+        </p>
+
+        <div class="values">
+            <div class="value-item">
+                <i class="fas fa-star"></i>
+                <h4>الجودة</h4>
+                <p style="font-size:0.85rem;color:#888;">منتجاتنا من أفضل العلامات</p>
+            </div>
+            <div class="value-item">
+                <i class="fas fa-hand-holding-heart"></i>
+                <h4>الثقة</h4>
+                <p style="font-size:0.85rem;color:#888;">عملاؤنا هم أولويتنا</p>
+            </div>
+            <div class="value-item">
+                <i class="fas fa-truck-fast"></i>
+                <h4>التوصيل</h4>
+                <p style="font-size:0.85rem;color:#888;">توصيل سريع وآمن</p>
+            </div>
+            <div class="value-item">
+                <i class="fas fa-handshake"></i>
+                <h4>الشفافية</h4>
+                <p style="font-size:0.85rem;color:#888;">أسعار واضحة ومنصفة</p>
+            </div>
+        </div>
+
+        <p style="text-align:center;font-size:0.95rem;color:#888;border-top:1px solid #eee;padding-top:1.5rem;">
+            📍 المحلة الكبرى - ميدان طلعت حرب على سور سكة القطار بعد مستشفى المبرة
+        </p>
+    </div>
+</div>
+
+<footer class="footer">
+    <p>© 2026 متجر أولاد شعلان - جميع الحقوق محفوظة</p>
+</footer>
+
+</body>
+</html>

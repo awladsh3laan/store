@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الألعاب | أولاد شعلان</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Tajawal', sans-serif; background: #f0f2f5; }
+        :root {
+            --sky-blue: #00B4D8;
+            --gold-dark: #B8860B;
+            --gold-light: #DAA520;
+            --dark-bg: #1a2a3a;
+            --shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+        .header {
+            background: var(--dark-bg);
+            color: white;
+            padding: 0.8rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .logo-img { height: 40px; width: auto; max-width: 140px; object-fit: contain; }
+        .logout-btn { background: #dc3545; color: white; border: none; padding: 0.4rem 1.2rem; border-radius: 25px; cursor: pointer; }
+        .container { padding: 1.5rem 5%; }
+        .back-link { display: inline-block; margin-bottom: 1rem; color: var(--sky-blue); text-decoration: none; }
+        .card { background: white; padding: 1.5rem; border-radius: 20px; box-shadow: var(--shadow); margin-bottom: 1.5rem; }
+        .card h3 { color: var(--gold-dark); margin-bottom: 1rem; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .form-grid input, .form-grid select, .form-grid textarea { width: 100%; padding: 0.7rem; border: 1px solid #ddd; border-radius: 10px; font-family: inherit; }
+        .form-grid .full { grid-column: 1 / -1; }
+        .btn { padding: 0.7rem 1.5rem; border: none; border-radius: 30px; cursor: pointer; font-weight: 600; }
+        .btn-primary { background: var(--sky-blue); color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-sm { padding: 0.2rem 0.8rem; border: none; border-radius: 5px; cursor: pointer; font-size: 0.8rem; }
+        .game-card { background: #f9f9f9; padding: 1rem; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 0.8rem; }
+        .status-badge { padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.7rem; }
+        .status-active { background: #28a745; color: white; }
+        .status-inactive { background: #dc3545; color: white; }
+        .prize-list { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .prize-tag { background: var(--gold-light); padding: 0.2rem 0.6rem; border-radius: 15px; font-size: 0.7rem; color: white; }
+        @media (max-width: 768px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .header { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <img src="https://i.servimg.com/u/f54/18/11/62/61/tm/picsar12.png" alt="أولاد شعلان" class="logo-img">
+    <div><span style="color:var(--gold-light);">إدارة الألعاب</span> <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> خروج</button></div>
+</header>
+
+<div class="container">
+    <a href="admin-dashboard.html" class="back-link"><i class="fas fa-arrow-right"></i> العودة للوحة التحكم</a>
+
+    <div class="card">
+        <h3><i class="fas fa-plus-circle"></i> إضافة لعبة أو مسابقة جديدة</h3>
+        <form id="gameForm" class="form-grid">
+            <input type="text" id="gTitle" placeholder="عنوان اللعبة" required>
+            <select id="gType" required>
+                <option value="quiz">📝 مسابقة معرفية</option>
+                <option value="wheel">🎡 عجلة الحظ</option>
+                <option value="speed">⚡ مسابقة السرعة</option>
+                <option value="puzzle">🧩 لغز اليوم</option>
+                <option value="points">⭐ الكوبون السحري</option>
+            </select>
+            <div class="full"><textarea id="gDesc" rows="2" placeholder="وصف اللعبة" required></textarea></div>
+            <input type="text" id="gImage" placeholder="رابط الصورة (اختياري)">
+            <input type="date" id="gStart" required>
+            <input type="date" id="gEnd" required>
+            <div class="full">
+                <label>الجوائز (اكتب كل جائزة في سطر)</label>
+                <textarea id="gPrizes" rows="3" placeholder="مثال:&#10;🥇 500 جنيه كوبون شراء&#10;🥈 30% خصم&#10;🥉 15% خصم"></textarea>
+            </div>
+            <div class="full"><button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> إضافة اللعبة</button></div>
+        </form>
+    </div>
+
+    <div class="card">
+        <h3><i class="fas fa-gamepad"></i> الألعاب والمسابقات الحالية</h3>
+        <div id="gamesList"></div>
+    </div>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyD5tuzZf8VTqT2J8MSZ5zLnzbqRsT_lipA",
+        authDomain: "awlad-sh3lan-store.firebaseapp.com",
+        projectId: "awlad-sh3lan-store",
+        storageBucket: "awlad-sh3lan-store.firebasestorage.app",
+        messagingSenderId: "77191704198",
+        appId: "1:77191704198:web:d2ce184d9c8ec2e876eb07"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    auth.onAuthStateChanged(async (user) => {
+        if (!user) { window.location.href = 'admin.html'; return; }
+        const adminDoc = await db.collection('admins').doc(user.uid).get();
+        if (!adminDoc.exists) { await auth.signOut(); window.location.href = 'admin.html'; return; }
+        loadGames();
+    });
+
+    document.getElementById('gameForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const prizes = document.getElementById('gPrizes').value.split('\n').filter(p => p.trim());
+        await db.collection('games').add({
+            title: document.getElementById('gTitle').value,
+            type: document.getElementById('gType').value,
+            description: document.getElementById('gDesc').value,
+            imageUrl: document.getElementById('gImage').value,
+            startDate: document.getElementById('gStart').value,
+            endDate: document.getElementById('gEnd').value,
+            prizes: prizes,
+            active: true,
+            createdAt: new Date().toISOString()
+        });
+        alert('✅ تم إضافة اللعبة');
+        document.getElementById('gameForm').reset();
+        loadGames();
+    });
+
+    async function loadGames() {
+        const snapshot = await db.collection('games').orderBy('createdAt', 'desc').get();
+        const container = document.getElementById('gamesList');
+        container.innerHTML = snapshot.docs.map(doc => {
+            const g = doc.data();
+            const prizeHtml = g.prizes?.map(p => `<span class="prize-tag">${p}</span>`).join('') || '';
+            return `
+                <div class="game-card">
+                    <div>
+                        <strong>${g.title}</strong> <span class="status-badge ${g.active ? 'status-active' : 'status-inactive'}">${g.active ? 'نشطة' : 'متوقفة'}</span>
+                        <br><small>${g.type} | ${g.startDate} → ${g.endDate}</small>
+                        <div class="prize-list">${prizeHtml}</div>
+                    </div>
+                    <div>
+                        <button class="btn-sm btn-primary" onclick="toggleGame('${doc.id}', ${!g.active})"><i class="fas fa-power-off"></i></button>
+                        <button class="btn-sm btn-danger" onclick="deleteGame('${doc.id}')"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    async function toggleGame(id, newStatus) { await db.collection('games').doc(id).update({ active: newStatus }); loadGames(); }
+    async function deleteGame(id) { if (confirm('هل أنت متأكد من حذف هذه اللعبة؟')) { await db.collection('games').doc(id).delete(); loadGames(); } }
+
+    async function logout() { await auth.signOut(); window.location.href = 'admin.html'; }
+
+    window.toggleGame = toggleGame;
+    window.deleteGame = deleteGame;
+    window.logout = logout;
+</script>
+
+</body>
+</html>

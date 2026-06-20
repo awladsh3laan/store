@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التقارير | أولاد شعلان</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Tajawal', sans-serif; background: #f0f2f5; }
+        :root {
+            --sky-blue: #00B4D8;
+            --gold-dark: #B8860B;
+            --gold-light: #DAA520;
+            --dark-bg: #1a2a3a;
+            --shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+        .header {
+            background: var(--dark-bg);
+            color: white;
+            padding: 0.8rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .logo-img { height: 40px; width: auto; max-width: 140px; object-fit: contain; }
+        .logout-btn { background: #dc3545; color: white; border: none; padding: 0.4rem 1.2rem; border-radius: 25px; cursor: pointer; }
+        .container { padding: 1.5rem 5%; }
+        .back-link { display: inline-block; margin-bottom: 1rem; color: var(--sky-blue); text-decoration: none; }
+        .card { background: white; padding: 1.5rem; border-radius: 20px; box-shadow: var(--shadow); margin-bottom: 1.5rem; }
+        .card h3 { color: var(--gold-dark); margin-bottom: 1rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 1rem; }
+        .stat-box { text-align: center; padding: 1rem; background: #f9f9f9; border-radius: 15px; }
+        .stat-box .num { font-size: 2rem; font-weight: 800; color: var(--sky-blue); }
+        .stat-box .label { font-size: 0.85rem; color: #666; }
+        .chart-container { margin-top: 1.5rem; }
+        .bar { display: flex; align-items: center; margin: 0.5rem 0; }
+        .bar-label { width: 80px; font-size: 0.85rem; }
+        .bar-track { flex: 1; height: 25px; background: #eee; border-radius: 12px; overflow: hidden; }
+        .bar-fill { height: 100%; background: linear-gradient(90deg, var(--sky-blue), var(--gold-light)); border-radius: 12px; }
+        .bar-value { width: 50px; text-align: left; font-size: 0.85rem; font-weight: 600; }
+        .btn { padding: 0.5rem 1.5rem; border: none; border-radius: 30px; cursor: pointer; }
+        .btn-primary { background: var(--sky-blue); color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-sm { padding: 0.2rem 0.8rem; border: none; border-radius: 5px; cursor: pointer; font-size: 0.8rem; }
+        .filters { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
+        .filters input, .filters select { padding: 0.5rem; border: 1px solid #ddd; border-radius: 10px; font-family: inherit; }
+        @media (max-width: 768px) {
+            .header { flex-direction: column; text-align: center; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .bar-label { width: 60px; font-size: 0.7rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <img src="https://i.servimg.com/u/f54/18/11/62/61/tm/picsar12.png" alt="أولاد شعلان" class="logo-img">
+    <div><span style="color:var(--gold-light);">التقارير والإحصائيات</span> <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> خروج</button></div>
+</header>
+
+<div class="container">
+    <a href="admin-dashboard.html" class="back-link"><i class="fas fa-arrow-right"></i> العودة للوحة التحكم</a>
+
+    <div class="card">
+        <h3><i class="fas fa-chart-simple"></i> نظرة عامة</h3>
+        <div class="stats-grid" id="overviewStats">
+            <div class="stat-box"><div class="num" id="totalOrders">0</div><div class="label">إجمالي الطلبات</div></div>
+            <div class="stat-box"><div class="num" id="totalRevenue">0</div><div class="label">إجمالي الإيرادات</div></div>
+            <div class="stat-box"><div class="num" id="totalProducts">0</div><div class="label">المنتجات</div></div>
+            <div class="stat-box"><div class="num" id="totalCustomers">0</div><div class="label">العملاء</div></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3><i class="fas fa-chart-bar"></i> المبيعات الشهرية</h3>
+        <div class="filters">
+            <select id="yearFilter">
+                <option value="2026">2026</option>
+                <option value="2025">2025</option>
+            </select>
+            <button onclick="loadMonthlyReport()" class="btn btn-primary">عرض التقرير</button>
+        </div>
+        <div id="monthlyChart"></div>
+    </div>
+
+    <div class="card">
+        <h3><i class="fas fa-trophy"></i> أفضل المنتجات مبيعاً</h3>
+        <div id="topProducts"></div>
+    </div>
+
+    <div class="card">
+        <h3><i class="fas fa-download"></i> تصدير التقارير</h3>
+        <button onclick="exportReport()" class="btn btn-success"><i class="fas fa-file-excel"></i> تصدير Excel</button>
+    </div>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyD5tuzZf8VTqT2J8MSZ5zLnzbqRsT_lipA",
+        authDomain: "awlad-sh3lan-store.firebaseapp.com",
+        projectId: "awlad-sh3lan-store",
+        storageBucket: "awlad-sh3lan-store.firebasestorage.app",
+        messagingSenderId: "77191704198",
+        appId: "1:77191704198:web:d2ce184d9c8ec2e876eb07"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    auth.onAuthStateChanged(async (user) => {
+        if (!user) { window.location.href = 'admin.html'; return; }
+        const adminDoc = await db.collection('admins').doc(user.uid).get();
+        if (!adminDoc.exists) { await auth.signOut(); window.location.href = 'admin.html'; return; }
+        loadOverview();
+        loadMonthlyReport();
+        loadTopProducts();
+    });
+
+    async function loadOverview() {
+        const orders = await db.collection('orders').get();
+        const products = await db.collection('products').get();
+        const customers = new Set();
+        let revenue = 0;
+        orders.forEach(doc => {
+            const o = doc.data();
+            revenue += o.totalAmount || 0;
+            if (o.customerName) customers.add(o.customerName);
+        });
+        document.getElementById('totalOrders').innerText = orders.size;
+        document.getElementById('totalRevenue').innerText = revenue.toFixed(0);
+        document.getElementById('totalProducts').innerText = products.size;
+        document.getElementById('totalCustomers').innerText = customers.size;
+    }
+
+    async function loadMonthlyReport() {
+        const year = document.getElementById('yearFilter').value;
+        const orders = await db.collection('orders').get();
+        const monthly = Array(12).fill(0);
+        orders.forEach(doc => {
+            const o = doc.data();
+            if (o.createdAt) {
+                const date = new Date(o.createdAt);
+                if (date.getFullYear() == year) {
+                    monthly[date.getMonth()] += o.totalAmount || 0;
+                }
+            }
+        });
+        const maxVal = Math.max(...monthly, 1);
+        const container = document.getElementById('monthlyChart');
+        const months = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+        container.innerHTML = monthly.map((val, i) => `
+            <div class="bar">
+                <div class="bar-label">${months[i]}</div>
+                <div class="bar-track"><div class="bar-fill" style="width:${(val/maxVal)*100}%;"></div></div>
+                <div class="bar-value">${val.toFixed(0)}</div>
+            </div>
+        `).join('');
+    }
+
+    async function loadTopProducts() {
+        const orders = await db.collection('orders').get();
+        const productCount = {};
+        orders.forEach(doc => {
+            const o = doc.data();
+            if (o.items) {
+                o.items.forEach(item => {
+                    productCount[item.name] = (productCount[item.name] || 0) + (item.quantity || 1);
+                });
+            }
+        });
+        const sorted = Object.entries(productCount).sort((a,b) => b[1] - a[1]).slice(0, 5);
+        const container = document.getElementById('topProducts');
+        if (sorted.length === 0) {
+            container.innerHTML = '<p style="color:#999;">لا توجد مبيعات حتى الآن</p>';
+            return;
+        }
+        const maxCount = sorted[0][1];
+        container.innerHTML = sorted.map(([name, count]) => `
+            <div class="bar">
+                <div class="bar-label">${name}</div>
+                <div class="bar-track"><div class="bar-fill" style="width:${(count/maxCount)*100}%;background:linear-gradient(90deg,var(--gold-dark),var(--gold-light));"></div></div>
+                <div class="bar-value">${count}</div>
+            </div>
+        `).join('');
+    }
+
+    function exportReport() {
+        alert('📥 سيتم تصدير التقرير كملف Excel (يمكن إضافة مكتبة xlsx)');
+    }
+
+    async function logout() { await auth.signOut(); window.location.href = 'admin.html'; }
+
+    window.loadMonthlyReport = loadMonthlyReport;
+    window.exportReport = exportReport;
+    window.logout = logout;
+</script>
+
+</body>
+</html>

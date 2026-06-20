@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>كيفية الاستخدام | أولاد شعلان</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8edf2 100%);
+            min-height: 100vh;
+        }
+        :root {
+            --sky-blue: #00B4D8;
+            --gold-dark: #B8860B;
+            --gold-light: #DAA520;
+            --green-light: #90E0EF;
+            --dark-bg: #1a2a3a;
+            --shadow: 0 8px 30px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
+
+        .header {
+            background: var(--dark-bg);
+            color: white;
+            padding: 0.8rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+        .logo-img { height: 40px; width: auto; max-width: 140px; object-fit: contain; }
+        .nav-links { display: flex; gap: 1.2rem; flex-wrap: wrap; align-items: center; }
+        .nav-links a { color: white; text-decoration: none; font-weight: 500; transition: var(--transition); }
+        .nav-links a:hover { color: var(--gold-light); }
+
+        .container { padding: 2rem 5%; max-width: 1200px; margin: 0 auto; }
+
+        .page-title {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .page-title h1 { color: var(--dark-bg); font-size: 2rem; }
+        .page-title h1 i { color: var(--sky-blue); }
+        .page-title p { color: #666; font-size: 1.1rem; }
+
+        .filters {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        .filter-btn {
+            padding: 0.5rem 1.5rem;
+            border: 2px solid #ddd;
+            border-radius: 30px;
+            background: white;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+        .filter-btn:hover { border-color: var(--sky-blue); }
+        .filter-btn.active { border-color: var(--sky-blue); background: var(--sky-blue); color: white; }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        .content-card:hover { transform: translateY(-8px); box-shadow: 0 15px 40px rgba(0,0,0,0.15); }
+
+        .content-card .media {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            background: #f0f2f5;
+        }
+
+        .content-card .media-video {
+            width: 100%;
+            height: 220px;
+            border: none;
+        }
+
+        .content-card .body {
+            padding: 1.5rem;
+        }
+        .content-card .body .badge {
+            display: inline-block;
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .badge-article { background: #17a2b8; color: white; }
+        .badge-image { background: #6f42c1; color: white; }
+        .badge-video { background: #dc3545; color: white; }
+
+        .content-card .body h3 { color: var(--dark-bg); margin-bottom: 0.5rem; }
+        .content-card .body p { color: #555; line-height: 1.8; }
+        .content-card .body .category-tag { color: var(--gold-dark); font-size: 0.85rem; margin-top: 0.5rem; display: block; }
+
+        .footer {
+            background: var(--dark-bg);
+            color: white;
+            padding: 2rem 5%;
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .header { flex-direction: column; text-align: center; }
+            .content-grid { grid-template-columns: 1fr; }
+            .page-title h1 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <img src="https://i.servimg.com/u/f54/18/11/62/61/tm/picsar12.png" alt="أولاد شعلان" class="logo-img">
+    <div class="nav-links">
+        <a href="index.html"><i class="fas fa-home"></i> الرئيسية</a>
+        <a href="store.html"><i class="fas fa-store"></i> المتجر</a>
+        <a href="how-to-use.html"><i class="fas fa-book-open"></i> كيفية الاستخدام</a>
+        <a href="track-order.html"><i class="fas fa-truck-fast"></i> تتبع الطلب</a>
+    </div>
+</header>
+
+<div class="container">
+    <div class="page-title">
+        <h1><i class="fas fa-book-open"></i> كيفية استخدام المنتجات</h1>
+        <p>دليل شامل لاستخدام منتجاتنا بشكل صحيح وآمن</p>
+    </div>
+
+    <div class="filters" id="filterContainer">
+        <button class="filter-btn active" data-filter="all" onclick="filterContent('all')">📌 الكل</button>
+        <button class="filter-btn" data-filter="تنظيف ملابس" onclick="filterContent('تنظيف ملابس')">🧺 تنظيف ملابس</button>
+        <button class="filter-btn" data-filter="عناية منزلية" onclick="filterContent('عناية منزلية')">🏠 عناية منزلية</button>
+        <button class="filter-btn" data-filter="ورقيات" onclick="filterContent('ورقيات')">📄 ورقيات</button>
+        <button class="filter-btn" data-filter="حفاضات وفوط صحية" onclick="filterContent('حفاضات وفوط صحية')">👶 حفاضات وفوط صحية</button>
+        <button class="filter-btn" data-filter="مبيدات حشرية" onclick="filterContent('مبيدات حشرية')">🦟 مبيدات حشرية</button>
+        <button class="filter-btn" data-filter="عام" onclick="filterContent('عام')">📌 عام</button>
+    </div>
+
+    <div id="contentContainer" class="content-grid">
+        <p style="text-align:center;width:100%;color:#999;padding:2rem;">جاري تحميل المحتوى...</p>
+    </div>
+</div>
+
+<footer class="footer">
+    <p>© 2026 متجر أولاد شعلان - جميع الحقوق محفوظة</p>
+</footer>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyD5tuzZf8VTqT2J8MSZ5zLnzbqRsT_lipA",
+        authDomain: "awlad-sh3lan-store.firebaseapp.com",
+        projectId: "awlad-sh3lan-store",
+        storageBucket: "awlad-sh3lan-store.firebasestorage.app",
+        messagingSenderId: "77191704198",
+        appId: "1:77191704198:web:d2ce184d9c8ec2e876eb07"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let allContent = [];
+    let currentFilter = 'all';
+
+    // ===== تحميل المحتوى =====
+    async function loadContent() {
+        const snapshot = await db.collection('howToUse')
+            .where('active', '==', true)
+            .orderBy('order')
+            .get();
+
+        allContent = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderContent(currentFilter);
+    }
+
+    // ===== عرض المحتوى =====
+    function renderContent(filter) {
+        const container = document.getElementById('contentContainer');
+        const filtered = filter === 'all' 
+            ? allContent 
+            : allContent.filter(c => c.category === filter);
+
+        if (filtered.length === 0) {
+            container.innerHTML = `
+                <div style="text-align:center;padding:3rem;width:100%;">
+                    <i class="fas fa-info-circle" style="font-size:3rem;color:#ccc;display:block;margin-bottom:1rem;"></i>
+                    <p style="color:#999;font-size:1.1rem;">لا توجد محتويات تعليمية في هذا التصنيف</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = filtered.map(item => {
+            let mediaHtml = '';
+            const typeLabels = { article: '📝 مقالة', image: '🖼️ صورة', video: '🎬 فيديو' };
+            const typeBadges = { article: 'badge-article', image: 'badge-image', video: 'badge-video' };
+
+            if (item.type === 'image' && item.imageUrl) {
+                mediaHtml = `<img class="media" src="${item.imageUrl}" alt="${item.title}">`;
+            } else if (item.type === 'video' && item.videoUrl) {
+                mediaHtml = `<iframe class="media-video" src="${item.videoUrl}" frameborder="0" allowfullscreen></iframe>`;
+            } else {
+                mediaHtml = `
+                    <div style="height:220px;background:linear-gradient(135deg,var(--sky-blue),var(--green-light));display:flex;align-items:center;justify-content:center;color:white;font-size:3rem;">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="content-card">
+                    ${mediaHtml}
+                    <div class="body">
+                        <span class="badge ${typeBadges[item.type] || 'badge-article'}">${typeLabels[item.type] || 'مقالة'}</span>
+                        <h3>${item.title}</h3>
+                        ${item.content ? `<p>${item.content}</p>` : ''}
+                        <span class="category-tag"><i class="fas fa-tag"></i> ${item.category || 'عام'}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // ===== فلترة المحتوى =====
+    function filterContent(filter) {
+        currentFilter = filter;
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.filter === filter);
+        });
+        renderContent(filter);
+    }
+
+    // ===== تحميل عند فتح الصفحة =====
+    loadContent();
+    window.filterContent = filterContent;
+</script>
+
+</body>
+</html>

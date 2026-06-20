@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة المحتوى التعليمي | أولاد شعلان</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Tajawal', sans-serif; background: #f0f2f5; }
+        :root {
+            --sky-blue: #00B4D8;
+            --gold-dark: #B8860B;
+            --gold-light: #DAA520;
+            --green-light: #90E0EF;
+            --dark-bg: #1a2a3a;
+            --shadow: 0 8px 25px rgba(0,0,0,0.08);
+            --transition: all 0.3s ease;
+        }
+        .header {
+            background: var(--dark-bg);
+            color: white;
+            padding: 0.8rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .logo-img { height: 40px; width: auto; max-width: 140px; object-fit: contain; }
+        .logout-btn { background: #dc3545; color: white; border: none; padding: 0.4rem 1.2rem; border-radius: 25px; cursor: pointer; transition: var(--transition); }
+        .logout-btn:hover { background: #c82333; }
+        .container { padding: 1.5rem 5%; }
+        .back-link { display: inline-block; margin-bottom: 1rem; color: var(--sky-blue); text-decoration: none; transition: var(--transition); }
+        .back-link:hover { color: var(--gold-dark); }
+        
+        .card { background: white; padding: 1.5rem; border-radius: 20px; box-shadow: var(--shadow); margin-bottom: 1.5rem; }
+        .card h3 { color: var(--gold-dark); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .form-grid input, .form-grid select, .form-grid textarea { width: 100%; padding: 0.7rem; border: 1px solid #ddd; border-radius: 10px; font-family: inherit; transition: var(--transition); }
+        .form-grid input:focus, .form-grid select:focus, .form-grid textarea:focus { border-color: var(--sky-blue); outline: none; box-shadow: 0 0 0 3px rgba(0,180,216,0.1); }
+        .form-grid .full { grid-column: 1 / -1; }
+        
+        .btn { padding: 0.7rem 1.5rem; border: none; border-radius: 30px; cursor: pointer; font-weight: 600; transition: var(--transition); }
+        .btn-primary { background: var(--sky-blue); color: white; }
+        .btn-primary:hover { background: #0098b8; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #218838; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-warning { background: var(--gold-dark); color: white; }
+        .btn-warning:hover { background: #a0700a; }
+        .btn-sm { padding: 0.3rem 0.8rem; border: none; border-radius: 5px; cursor: pointer; font-size: 0.8rem; transition: var(--transition); }
+        
+        .type-selector { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
+        .type-option { padding: 0.5rem 1.5rem; border: 2px solid #ddd; border-radius: 30px; cursor: pointer; transition: var(--transition); background: white; }
+        .type-option:hover { border-color: var(--sky-blue); }
+        .type-option.active { border-color: var(--sky-blue); background: var(--sky-blue); color: white; }
+        .type-option i { margin-left: 0.3rem; }
+        
+        .image-preview { max-width: 150px; max-height: 120px; object-fit: cover; border-radius: 10px; margin-top: 0.5rem; border: 2px solid #eee; }
+        .items-grid { display: grid; gap: 0.8rem; margin-top: 1rem; }
+        .item-card { background: #f9f9f9; padding: 0.8rem 1rem; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; transition: var(--transition); }
+        .item-card:hover { background: #f0f0f0; }
+        .item-card .badge { padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
+        .badge-article { background: #17a2b8; color: white; }
+        .badge-image { background: #6f42c1; color: white; }
+        .badge-video { background: #dc3545; color: white; }
+        .status-badge { padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.7rem; }
+        .status-active { background: #28a745; color: white; }
+        .status-inactive { background: #dc3545; color: white; }
+        
+        .hidden { display: none; }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-content { background: white; width: 95%; max-width: 650px; max-height: 90vh; border-radius: 25px; padding: 2rem; overflow-y: auto; }
+        .modal-close { float: left; cursor: pointer; font-size: 1.5rem; color: #999; transition: var(--transition); }
+        .modal-close:hover { color: var(--dark-bg); }
+        
+        @media (max-width: 768px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .header { flex-direction: column; text-align: center; }
+            .type-selector { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <img src="https://i.servimg.com/u/f54/18/11/62/61/tm/picsar12.png" alt="أولاد شعلان" class="logo-img">
+    <div><span style="color:var(--gold-light);">📚 إدارة المحتوى التعليمي</span> <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> خروج</button></div>
+</header>
+
+<div class="container">
+    <a href="admin-dashboard.html" class="back-link"><i class="fas fa-arrow-right"></i> العودة للوحة التحكم</a>
+
+    <!-- ===== إضافة محتوى جديد ===== -->
+    <div class="card">
+        <h3><i class="fas fa-plus-circle"></i> إضافة محتوى تعليمي جديد</h3>
+        
+        <form id="contentForm" class="form-grid">
+            <input type="text" id="cTitle" placeholder="العنوان (مثال: كيفية غسيل الملابس البيضاء)" required>
+            
+            <select id="cCategory" required>
+                <option value="">اختر التصنيف</option>
+                <option value="تنظيف ملابس">🧺 تنظيف ملابس</option>
+                <option value="عناية منزلية">🏠 عناية منزلية</option>
+                <option value="ورقيات">📄 ورقيات</option>
+                <option value="حفاضات وفوط صحية">👶 حفاضات وفوط صحية</option>
+                <option value="مبيدات حشرية">🦟 مبيدات حشرية</option>
+                <option value="عام">📌 عام</option>
+            </select>
+            
+            <input type="number" id="cOrder" placeholder="ترتيب العرض" value="0">
+            
+            <select id="cActive">
+                <option value="true">✅ نشط</option>
+                <option value="false">❌ غير نشط</option>
+            </select>
+            
+            <!-- اختيار نوع المحتوى -->
+            <div class="full">
+                <label style="display:block;margin-bottom:0.5rem;font-weight:600;">اختر نوع المحتوى:</label>
+                <div class="type-selector">
+                    <div class="type-option active" data-type="article" onclick="selectType('article')">
+                        <i class="fas fa-file-alt"></i> مقالة
+                    </div>
+                    <div class="type-option" data-type="image" onclick="selectType('image')">
+                        <i class="fas fa-image"></i> صورة
+                    </div>
+                    <div class="type-option" data-type="video" onclick="selectType('video')">
+                        <i class="fas fa-video"></i> فيديو
+                    </div>
+                </div>
+            </div>
+            
+            <!-- حقل المقالة -->
+            <div class="full" id="articleField">
+                <textarea id="cContent" rows="6" placeholder="اكتب محتوى المقالة هنا..." style="width:100%;padding:0.7rem;border:1px solid #ddd;border-radius:10px;font-family:inherit;"></textarea>
+            </div>
+            
+            <!-- حقل الصورة -->
+            <div class="full hidden" id="imageField">
+                <label style="display:block;margin-bottom:0.3rem;">رفع صورة:</label>
+                <input type="file" id="cImage" accept="image/*">
+                <img id="imagePreview" class="image-preview hidden">
+            </div>
+            
+            <!-- حقل الفيديو -->
+            <div class="full hidden" id="videoField">
+                <input type="url" id="cVideo" placeholder="رابط الفيديو (مثال: https://www.youtube.com/embed/xxxxx)">
+                <p style="font-size:0.8rem;color:#999;margin-top:0.3rem;">
+                    <i class="fas fa-info-circle"></i> استخدم رابط embed من YouTube أو رابط مباشر
+                </p>
+            </div>
+            
+            <div class="full">
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> حفظ المحتوى</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- ===== قائمة المحتويات ===== -->
+    <div class="card">
+        <h3><i class="fas fa-list"></i> المحتويات التعليمية</h3>
+        <div id="contentsList" class="items-grid"></div>
+    </div>
+</div>
+
+<!-- ===== مودال تعديل ===== -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <span class="modal-close" onclick="closeEditModal()">&times;</span>
+        <h3><i class="fas fa-edit"></i> تعديل المحتوى</h3>
+        <form id="editForm" class="form-grid">
+            <input type="text" id="eTitle" placeholder="العنوان" required>
+            <select id="eCategory"><option value="تنظيف ملابس">🧺 تنظيف ملابس</option><option value="عناية منزلية">🏠 عناية منزلية</option><option value="ورقيات">📄 ورقيات</option><option value="حفاضات وفوط صحية">👶 حفاضات وفوط صحية</option><option value="مبيدات حشرية">🦟 مبيدات حشرية</option><option value="عام">📌 عام</option></select>
+            <input type="number" id="eOrder" placeholder="ترتيب العرض">
+            <select id="eActive"><option value="true">✅ نشط</option><option value="false">❌ غير نشط</option></select>
+            <div class="full"><textarea id="eContent" rows="4" placeholder="المحتوى"></textarea></div>
+            <div class="full"><button type="submit" class="btn btn-success"><i class="fas fa-save"></i> حفظ التغييرات</button></div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyD5tuzZf8VTqT2J8MSZ5zLnzbqRsT_lipA",
+        authDomain: "awlad-sh3lan-store.firebaseapp.com",
+        projectId: "awlad-sh3lan-store",
+        storageBucket: "awlad-sh3lan-store.firebasestorage.app",
+        messagingSenderId: "77191704198",
+        appId: "1:77191704198:web:d2ce184d9c8ec2e876eb07"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    
+    const IMGBB_API_KEY = "99506f7c2987acaf6709c7fb0e978298";
+    let currentType = 'article';
+    let editId = null;
+
+    // ===== التحقق من تسجيل الدخول =====
+    auth.onAuthStateChanged(async (user) => {
+        if (!user) { window.location.href = 'admin.html'; return; }
+        const adminDoc = await db.collection('admins').doc(user.uid).get();
+        if (!adminDoc.exists) { await auth.signOut(); window.location.href = 'admin.html'; return; }
+        loadContents();
+    });
+
+    // ===== اختيار نوع المحتوى =====
+    function selectType(type) {
+        currentType = type;
+        document.querySelectorAll('.type-option').forEach(el => el.classList.remove('active'));
+        document.querySelector(`.type-option[data-type="${type}"]`).classList.add('active');
+        
+        document.getElementById('articleField').classList.toggle('hidden', type !== 'article');
+        document.getElementById('imageField').classList.toggle('hidden', type !== 'image');
+        document.getElementById('videoField').classList.toggle('hidden', type !== 'video');
+    }
+
+    // ===== معاينة الصورة =====
+    document.getElementById('cImage')?.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const preview = document.getElementById('imagePreview');
+                preview.classList.remove('hidden');
+                preview.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // ===== رفع الصورة لـ ImgBB =====
+    async function uploadToImgBB(file) {
+        const formData = new FormData();
+        formData.append("image", file);
+        const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: formData });
+        const data = await response.json();
+        if (data.success) return data.data.url;
+        throw new Error("فشل رفع الصورة");
+    }
+
+    // ===== إضافة محتوى جديد =====
+    document.getElementById('contentForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const title = document.getElementById('cTitle').value.trim();
+        const category = document.getElementById('cCategory').value;
+        const order = parseInt(document.getElementById('cOrder').value) || 0;
+        const active = document.getElementById('cActive').value === 'true';
+        let content = '';
+        let imageUrl = '';
+        let videoUrl = '';
+
+        if (currentType === 'article') {
+            content = document.getElementById('cContent').value.trim();
+            if (!content) { alert('الرجاء كتابة محتوى المقالة'); return; }
+        } else if (currentType === 'image') {
+            const file = document.getElementById('cImage').files[0];
+            if (!file) { alert('الرجاء اختيار صورة'); return; }
+            imageUrl = await uploadToImgBB(file);
+        } else if (currentType === 'video') {
+            videoUrl = document.getElementById('cVideo').value.trim();
+            if (!videoUrl) { alert('الرجاء إدخال رابط الفيديو'); return; }
+        }
+
+        await db.collection('howToUse').add({
+            title: title,
+            type: currentType,
+            category: category,
+            content: content,
+            imageUrl: imageUrl,
+            videoUrl: videoUrl,
+            order: order,
+            active: active,
+            createdAt: new Date().toISOString()
+        });
+
+        alert('✅ تم حفظ المحتوى بنجاح');
+        document.getElementById('contentForm').reset();
+        document.getElementById('imagePreview').classList.add('hidden');
+        selectType('article');
+        loadContents();
+    });
+
+    // ===== تحميل وعرض المحتويات =====
+    async function loadContents() {
+        const snapshot = await db.collection('howToUse').orderBy('order').get();
+        const container = document.getElementById('contentsList');
+        
+        if (snapshot.empty) {
+            container.innerHTML = '<p style="color:#999;text-align:center;padding:1rem;">لا توجد محتويات تعليمية حتى الآن</p>';
+            return;
+        }
+
+        container.innerHTML = snapshot.docs.map(doc => {
+            const c = doc.data();
+            const typeIcons = { article: 'fa-file-alt', image: 'fa-image', video: 'fa-video' };
+            const typeBadges = { article: 'badge-article', image: 'badge-image', video: 'badge-video' };
+            const typeLabels = { article: 'مقالة', image: 'صورة', video: 'فيديو' };
+            
+            let preview = '';
+            if (c.type === 'image' && c.imageUrl) {
+                preview = `<img src="${c.imageUrl}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">`;
+            } else if (c.type === 'video' && c.videoUrl) {
+                preview = `<i class="fas fa-play-circle" style="font-size:1.8rem;color:var(--sky-blue);"></i>`;
+            } else {
+                preview = `<i class="fas ${typeIcons[c.type]}" style="font-size:1.5rem;color:var(--gold-dark);"></i>`;
+            }
+
+            return `
+                <div class="item-card">
+                    <div style="display:flex;align-items:center;gap:0.8rem;flex-wrap:wrap;">
+                        ${preview}
+                        <div>
+                            <strong>${c.title}</strong>
+                            <span class="badge ${typeBadges[c.type] || 'badge-article'}">${typeLabels[c.type] || 'مقالة'}</span>
+                            <span class="status-badge ${c.active ? 'status-active' : 'status-inactive'}">${c.active ? 'نشط' : 'غير نشط'}</span>
+                            <br><small style="color:#888;">${c.category || 'عام'} | الترتيب: ${c.order || 0}</small>
+                        </div>
+                    </div>
+                    <div>
+                        <button class="btn-sm btn-warning" onclick="editContent('${doc.id}')"><i class="fas fa-edit"></i></button>
+                        <button class="btn-sm btn-danger" onclick="deleteContent('${doc.id}')"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // ===== حذف محتوى =====
+    async function deleteContent(id) {
+        if (confirm('هل أنت متأكد من حذف هذا المحتوى؟')) {
+            await db.collection('howToUse').doc(id).delete();
+            loadContents();
+        }
+    }
+
+    // ===== تعديل محتوى =====
+    async function editContent(id) {
+        editId = id;
+        const doc = await db.collection('howToUse').doc(id).get();
+        const c = doc.data();
+        
+        document.getElementById('eTitle').value = c.title || '';
+        document.getElementById('eCategory').value = c.category || 'عام';
+        document.getElementById('eOrder').value = c.order || 0;
+        document.getElementById('eActive').value = c.active ? 'true' : 'false';
+        document.getElementById('eContent').value = c.content || '';
+        
+        document.getElementById('editModal').style.display = 'flex';
+    }
+
+    function closeEditModal() {
+        document.getElementById('editModal').style.display = 'none';
+        editId = null;
+    }
+
+    // ===== حفظ التعديل =====
+    document.getElementById('editForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!editId) return;
+        
+        await db.collection('howToUse').doc(editId).update({
+            title: document.getElementById('eTitle').value,
+            category: document.getElementById('eCategory').value,
+            order: parseInt(document.getElementById('eOrder').value) || 0,
+            active: document.getElementById('eActive').value === 'true',
+            content: document.getElementById('eContent').value
+        });
+        
+        alert('✅ تم تحديث المحتوى');
+        closeEditModal();
+        loadContents();
+    });
+
+    // ===== تسجيل الخروج =====
+    async function logout() {
+        await auth.signOut();
+        window.location.href = 'admin.html';
+    }
+
+    // ===== تصدير الدوال =====
+    window.selectType = selectType;
+    window.editContent = editContent;
+    window.deleteContent = deleteContent;
+    window.closeEditModal = closeEditModal;
+    window.logout = logout;
+</script>
+
+</body>
+</html>

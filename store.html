@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المتجر | أولاد شعلان</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Tajawal', sans-serif; background: #f0f2f5; }
+        :root {
+            --sky-blue: #00B4D8;
+            --gold-dark: #B8860B;
+            --gold-light: #DAA520;
+            --green-light: #90E0EF;
+            --dark-bg: #1a2a3a;
+            --shadow: 0 8px 25px rgba(0,0,0,0.08);
+            --transition: all 0.3s ease;
+        }
+        .header {
+            background: var(--dark-bg);
+            color: white;
+            padding: 0.8rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+        .logo-img { height: 40px; width: auto; max-width: 140px; object-fit: contain; }
+        .nav-links { display: flex; gap: 1.2rem; flex-wrap: wrap; align-items: center; }
+        .nav-links a { color: white; text-decoration: none; font-weight: 500; transition: var(--transition); }
+        .nav-links a:hover { color: var(--gold-light); }
+        .cart-icon { position: relative; cursor: pointer; font-size: 1.3rem; }
+        .cart-count { position: absolute; top: -10px; right: -15px; background: var(--gold-dark); color: white; border-radius: 50%; width: 22px; height: 22px; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; }
+
+        .container { padding: 1.5rem 5%; max-width: 1400px; margin: 0 auto; }
+
+        /* ===== البحث والفلتر ===== */
+        .search-bar {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+            background: white;
+            padding: 1rem;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+        }
+        .search-bar input {
+            flex: 1;
+            padding: 0.7rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            font-family: inherit;
+            min-width: 200px;
+        }
+        .search-bar select {
+            padding: 0.7rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            font-family: inherit;
+            background: white;
+        }
+
+        /* ===== التصنيفات ===== */
+        .categories-bar {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+        .cat-btn {
+            padding: 0.4rem 1.2rem;
+            border: 2px solid #ddd;
+            border-radius: 30px;
+            background: white;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+        .cat-btn:hover { border-color: var(--sky-blue); }
+        .cat-btn.active { border-color: var(--sky-blue); background: var(--sky-blue); color: white; }
+
+        /* ===== البراندات ===== */
+        .brands-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+            background: white;
+            padding: 1rem;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            align-items: center;
+        }
+        .brands-row .label { font-weight: 700; color: var(--gold-dark); }
+        .brand-item {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            background: #f9f9f9;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .brand-item:hover { background: var(--sky-blue); color: white; }
+        .brand-item img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
+        .brand-item.active { background: var(--sky-blue); color: white; }
+
+        /* ===== المنتجات ===== */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1.5rem;
+        }
+        .product-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+        }
+        .product-card:hover { transform: translateY(-8px); box-shadow: 0 15px 40px rgba(0,0,0,0.12); }
+        .product-card img { width: 100%; height: 200px; object-fit: cover; }
+        .product-card .info { padding: 1rem; }
+        .product-card .info h3 { font-size: 1rem; margin-bottom: 0.3rem; color: var(--dark-bg); }
+        .product-card .info .price { color: var(--gold-dark); font-weight: 800; font-size: 1.2rem; }
+        .product-card .info .old-price { text-decoration: line-through; color: #999; font-size: 0.85rem; margin-right: 0.5rem; }
+        .product-card .info .stock { font-size: 0.8rem; color: #888; }
+        .product-card .info .stock.available { color: #28a745; }
+        .product-card .info .stock.out { color: #dc3545; }
+        .add-btn {
+            width: 100%;
+            padding: 0.7rem;
+            border: none;
+            background: linear-gradient(135deg, var(--sky-blue), var(--green-light));
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .add-btn:hover { background: linear-gradient(135deg, var(--gold-dark), var(--gold-light)); }
+        .add-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .fav-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            color: #ccc;
+            font-size: 1rem;
+        }
+        .fav-btn.active { color: #dc3545; }
+        .fav-btn:hover { transform: scale(1.1); }
+
+        .footer {
+            background: var(--dark-bg);
+            color: white;
+            padding: 2rem 5%;
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .header { flex-direction: column; text-align: center; }
+            .search-bar { flex-direction: column; }
+            .products-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+            .brands-row { justify-content: center; }
+        }
+        @media (max-width: 480px) {
+            .products-grid { grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+            .product-card img { height: 150px; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <img src="https://i.servimg.com/u/f54/18/11/62/61/tm/picsar12.png" alt="أولاد شعلان" class="logo-img">
+    <div class="nav-links">
+        <a href="index.html"><i class="fas fa-home"></i> الرئيسية</a>
+        <a href="store.html"><i class="fas fa-store"></i> المتجر</a>
+        <a href="how-to-use.html"><i class="fas fa-book-open"></i> كيفية الاستخدام</a>
+        <a href="track-order.html"><i class="fas fa-truck-fast"></i> تتبع الطلب</a>
+        <div class="cart-icon" onclick="goToCheckout()">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="cart-count" id="cartCount">0</span>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <!-- ===== شريط البحث ===== -->
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="🔍 ابحث عن منتج..." onkeyup="filterProducts()">
+        <select id="sortSelect" onchange="filterProducts()">
+            <option value="newest">الأحدث</option>
+            <option value="price-asc">السعر: من الأقل للأعلى</option>
+            <option value="price-desc">السعر: من الأعلى للأقل</option>
+        </select>
+    </div>
+
+    <!-- ===== التصنيفات ===== -->
+    <div class="categories-bar" id="categoriesBar">
+        <button class="cat-btn active" data-cat="all" onclick="filterByCategory('all')">📌 الكل</button>
+    </div>
+
+    <!-- ===== البراندات ===== -->
+    <div class="brands-row" id="brandsRow">
+        <span class="label"><i class="fas fa-building"></i> البراندات:</span>
+        <span style="color:#999;">جاري التحميل...</span>
+    </div>
+
+    <!-- ===== المنتجات ===== -->
+    <div class="products-grid" id="productsGrid"></div>
+</div>
+
+<footer class="footer">
+    <p>© 2026 متجر أولاد شعلان - جميع الحقوق محفوظة</p>
+</footer>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyD5tuzZf8VTqT2J8MSZ5zLnzbqRsT_lipA",
+        authDomain: "awlad-sh3lan-store.firebaseapp.com",
+        projectId: "awlad-sh3lan-store",
+        storageBucket: "awlad-sh3lan-store.firebasestorage.app",
+        messagingSenderId: "77191704198",
+        appId: "1:77191704198:web:d2ce184d9c8ec2e876eb07"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let allProducts = [];
+    let allCategories = [];
+    let allBrands = [];
+    let currentCategory = 'all';
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+
+    // ===== تحديث عداد السلة =====
+    function updateCartCount() {
+        document.getElementById('cartCount').innerText = cart.reduce((s, i) => s + i.quantity, 0);
+    }
+
+    // ===== الانتقال للدفع =====
+    function goToCheckout() {
+        if (cart.length === 0) { alert('السلة فارغة'); return; }
+        localStorage.setItem('cart', JSON.stringify(cart));
+        window.location.href = 'checkout.html';
+    }
+
+    // ===== تحميل البيانات =====
+    async function loadData() {
+        // تحميل المنتجات
+        const productsSnap = await db.collection('products').get();
+        allProducts = productsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+        // تحميل التصنيفات
+        const catSnap = await db.collection('categories').get();
+        allCategories = catSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderCategories();
+
+        // تحميل البراندات
+        const brandSnap = await db.collection('brands').get();
+        allBrands = brandSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderBrands();
+
+        filterProducts();
+        updateCartCount();
+    }
+
+    // ===== عرض التصنيفات =====
+    function renderCategories() {
+        const bar = document.getElementById('categoriesBar');
+        const buttons = allCategories.map(c => `
+            <button class="cat-btn" data-cat="${c.id}" onclick="filterByCategory('${c.id}')">${c.name}</button>
+        `).join('');
+        bar.innerHTML = `<button class="cat-btn active" data-cat="all" onclick="filterByCategory('all')">📌 الكل</button> ${buttons}`;
+    }
+
+    // ===== عرض البراندات =====
+    function renderBrands() {
+        const row = document.getElementById('brandsRow');
+        row.innerHTML = `
+            <span class="label"><i class="fas fa-building"></i> البراندات:</span>
+            ${allBrands.map(b => `
+                <div class="brand-item" data-brand="${b.id}" onclick="filterByBrand('${b.id}')">
+                    ${b.imageUrl ? `<img src="${b.imageUrl}" alt="${b.name}">` : '<i class="fas fa-store"></i>'}
+                    <span>${b.name}</span>
+                </div>
+            `).join('')}
+        `;
+    }
+
+    // ===== فلترة حسب التصنيف =====
+    function filterByCategory(catId) {
+        currentCategory = catId;
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === catId));
+        document.querySelectorAll('.brand-item').forEach(b => b.classList.remove('active'));
+        filterProducts();
+    }
+
+    // ===== فلترة حسب البراند =====
+    function filterByBrand(brandId) {
+        document.querySelectorAll('.brand-item').forEach(b => b.classList.toggle('active', b.dataset.brand === brandId));
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector('.cat-btn[data-cat="all"]').classList.add('active');
+        currentCategory = 'all';
+        filterProducts(brandId);
+    }
+
+    // ===== فلترة وبحث =====
+    function filterProducts(brandFilter = null) {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const sort = document.getElementById('sortSelect').value;
+        const activeBrand = brandFilter || document.querySelector('.brand-item.active')?.dataset.brand;
+
+        let filtered = allProducts;
+
+        if (currentCategory !== 'all') {
+            filtered = filtered.filter(p => p.categoryId === currentCategory);
+        }
+        if (activeBrand) {
+            filtered = filtered.filter(p => p.brandId === activeBrand);
+        }
+        if (search) {
+            filtered = filtered.filter(p => p.name?.toLowerCase().includes(search));
+        }
+
+        // ترتيب
+        if (sort === 'price-asc') filtered.sort((a,b) => (a.discountPrice || a.price) - (b.discountPrice || b.price));
+        else if (sort === 'price-desc') filtered.sort((a,b) => (b.discountPrice || b.price) - (a.discountPrice || a.price));
+        else filtered.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        renderProducts(filtered);
+    }
+
+    // ===== عرض المنتجات =====
+    function renderProducts(products) {
+        const grid = document.getElementById('productsGrid');
+        if (products.length === 0) {
+            grid.innerHTML = `<p style="text-align:center;width:100%;color:#999;padding:2rem;">لا توجد منتجات</p>`;
+            return;
+        }
+
+        grid.innerHTML = products.map(p => {
+            const isFav = favorites.includes(p.id);
+            const price = p.discountPrice || p.price;
+            const isOut = p.stock <= 0;
+            return `
+                <div class="product-card">
+                    <button class="fav-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite('${p.id}')">
+                        <i class="fas fa-heart"></i>
+                    </button>
+                    <img src="${p.images && p.images[0] ? p.images[0] : 'https://via.placeholder.com/200'}" alt="${p.name}">
+                    <div class="info">
+                        <h3>${p.name}</h3>
+                        <div>
+                            <span class="price">${price} جنيه</span>
+                            ${p.discountPrice ? `<span class="old-price">${p.price}</span>` : ''}
+                        </div>
+                        <div class="stock ${isOut ? 'out' : 'available'}">
+                            ${isOut ? '❌ غير متوفر' : `✅ متوفر (${p.stock})`}
+                        </div>
+                    </div>
+                    <button class="add-btn" onclick="addToCart('${p.id}')" ${isOut ? 'disabled' : ''}>
+                        <i class="fas fa-cart-plus"></i> ${isOut ? 'غير متوفر' : 'أضف للسلة'}
+                    </button>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // ===== إضافة للسلة =====
+    function addToCart(productId) {
+        const product = allProducts.find(p => p.id === productId);
+        if (!product || product.stock <= 0) return;
+        const existing = cart.find(i => i.id === productId);
+        if (existing) existing.quantity++;
+        else cart.push({ id: productId, name: product.name, price: product.discountPrice || product.price, quantity: 1 });
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartCount();
+    }
+
+    // ===== المفضلة (Offline Support) =====
+    function toggleFavorite(productId) {
+        const index = favorites.indexOf(productId);
+        if (index > -1) favorites.splice(index, 1);
+        else favorites.push(productId);
+        localStorage.setItem('favorites', JSON.stringify(favorites));
+        filterProducts();
+    }
+
+    // ===== تهيئة =====
+    loadData();
+    window.filterByCategory = filterByCategory;
+    window.filterByBrand = filterByBrand;
+    window.filterProducts = filterProducts;
+    window.addToCart = addToCart;
+    window.toggleFavorite = toggleFavorite;
+    window.goToCheckout = goToCheckout;
+</script>
+
+</body>
+</html>

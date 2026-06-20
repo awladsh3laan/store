@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الشحن | أولاد شعلان</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Tajawal', sans-serif; background: #f0f2f5; }
+        :root {
+            --sky-blue: #00B4D8;
+            --gold-dark: #B8860B;
+            --gold-light: #DAA520;
+            --dark-bg: #1a2a3a;
+            --shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+        .header {
+            background: var(--dark-bg);
+            color: white;
+            padding: 0.8rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .logo-img { height: 40px; width: auto; max-width: 140px; object-fit: contain; }
+        .logout-btn { background: #dc3545; color: white; border: none; padding: 0.4rem 1.2rem; border-radius: 25px; cursor: pointer; }
+        .container { padding: 1.5rem 5%; }
+        .back-link { display: inline-block; margin-bottom: 1rem; color: var(--sky-blue); text-decoration: none; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .card { background: white; padding: 1.5rem; border-radius: 20px; box-shadow: var(--shadow); }
+        .card h3 { color: var(--gold-dark); margin-bottom: 1rem; }
+        .form-group { margin-bottom: 0.8rem; }
+        .form-group input, .form-group select { width: 100%; padding: 0.7rem; border: 1px solid #ddd; border-radius: 10px; font-family: inherit; }
+        .btn { padding: 0.7rem 1.5rem; border: none; border-radius: 30px; cursor: pointer; font-weight: 600; }
+        .btn-primary { background: var(--sky-blue); color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-sm { padding: 0.2rem 0.8rem; border: none; border-radius: 5px; cursor: pointer; font-size: 0.8rem; }
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem; border-bottom: 1px solid #eee; flex-wrap: wrap; }
+        .payment-box { background: linear-gradient(135deg, var(--sky-blue), #90E0EF); padding: 1rem; border-radius: 15px; color: white; margin-bottom: 1rem; }
+        .payment-box p { margin: 0.3rem 0; }
+        @media (max-width: 768px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            .header { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <img src="https://i.servimg.com/u/f54/18/11/62/61/tm/picsar12.png" alt="أولاد شعلان" class="logo-img">
+    <div><span style="color:var(--gold-light);">إدارة الشحن</span> <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> خروج</button></div>
+</header>
+
+<div class="container">
+    <a href="admin-dashboard.html" class="back-link"><i class="fas fa-arrow-right"></i> العودة للوحة التحكم</a>
+
+    <div class="payment-box">
+        <h3><i class="fas fa-money-bill-wave"></i> أرقام الدفع للعملاء</h3>
+        <p><i class="fab fa-instalod"></i> إنستاباي: <strong>01063835028</strong></p>
+        <p><i class="fas fa-wallet"></i> إي أند كاش: <strong>01120282953</strong></p>
+        <p><i class="fas fa-wallet"></i> فودافون كاش: <strong>01068385028</strong></p>
+        <p style="font-size:0.85rem;opacity:0.8;"><i class="fas fa-info-circle"></i> رسوم المحافظ: 5 جنيه إضافية</p>
+    </div>
+
+    <div class="grid-2">
+        <!-- البلدان -->
+        <div class="card">
+            <h3><i class="fas fa-globe"></i> البلدان</h3>
+            <form id="countryForm">
+                <div class="form-group"><input type="text" id="countryName" placeholder="اسم البلد" required></div>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> إضافة بلد</button>
+            </form>
+            <div id="countriesList" style="margin-top:1rem;"></div>
+        </div>
+
+        <!-- المدن -->
+        <div class="card">
+            <h3><i class="fas fa-city"></i> المدن وتكاليف الشحن</h3>
+            <form id="cityForm">
+                <div class="form-group"><select id="cityCountry" required><option value="">اختر البلد</option></select></div>
+                <div class="form-group"><input type="text" id="cityName" placeholder="اسم المدينة" required></div>
+                <div class="form-group"><input type="number" id="cityCost" placeholder="تكلفة الشحن" required></div>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> إضافة مدينة</button>
+            </form>
+            <div id="citiesList" style="margin-top:1rem;"></div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top:1.5rem;">
+        <h3><i class="fas fa-cogs"></i> إعدادات الشحن العامة</h3>
+        <form id="settingsForm" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+            <div class="form-group"><input type="number" id="minOrder" placeholder="الحد الأدنى للطلب (جنيه)"></div>
+            <div class="form-group"><input type="number" id="defaultShipping" placeholder="تكلفة الشحن الافتراضية"></div>
+            <div class="form-group" style="grid-column:1/-1;"><input type="number" id="taxPercent" placeholder="نسبة الضريبة (مثال: 14)"></div>
+            <div style="grid-column:1/-1;"><button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> حفظ الإعدادات</button></div>
+        </form>
+        <div id="currentSettings" style="margin-top:1rem;background:#f9f9f9;padding:1rem;border-radius:10px;"></div>
+    </div>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyD5tuzZf8VTqT2J8MSZ5zLnzbqRsT_lipA",
+        authDomain: "awlad-sh3lan-store.firebaseapp.com",
+        projectId: "awlad-sh3lan-store",
+        storageBucket: "awlad-sh3lan-store.firebasestorage.app",
+        messagingSenderId: "77191704198",
+        appId: "1:77191704198:web:d2ce184d9c8ec2e876eb07"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    auth.onAuthStateChanged(async (user) => {
+        if (!user) { window.location.href = 'admin.html'; return; }
+        const adminDoc = await db.collection('admins').doc(user.uid).get();
+        if (!adminDoc.exists) { await auth.signOut(); window.location.href = 'admin.html'; return; }
+        loadCountries();
+        loadCities();
+        loadSettings();
+        loadCountrySelect();
+    });
+
+    // ===== البلدان =====
+    document.getElementById('countryForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await db.collection('countries').add({ name: document.getElementById('countryName').value });
+        alert('✅ تم إضافة البلد');
+        document.getElementById('countryForm').reset();
+        loadCountries();
+        loadCountrySelect();
+    });
+
+    async function loadCountries() {
+        const snapshot = await db.collection('countries').get();
+        document.getElementById('countriesList').innerHTML = snapshot.docs.map(d => `
+            <div class="list-item"><span>${d.data().name}</span><button class="btn-sm btn-danger" onclick="deleteCountry('${d.id}')">حذف</button></div>
+        `).join('');
+    }
+
+    async function deleteCountry(id) {
+        if (confirm('حذف البلد سيؤدي لحذف المدن التابعة له')) {
+            const cities = await db.collection('cities').where('countryId','==',id).get();
+            cities.forEach(c => db.collection('cities').doc(c.id).delete());
+            await db.collection('countries').doc(id).delete();
+            loadCountries();
+            loadCities();
+            loadCountrySelect();
+        }
+    }
+
+    // ===== المدن =====
+    async function loadCountrySelect() {
+        const snapshot = await db.collection('countries').get();
+        document.getElementById('cityCountry').innerHTML = '<option value="">اختر البلد</option>' + snapshot.docs.map(d => `<option value="${d.id}">${d.data().name}</option>`).join('');
+    }
+
+    document.getElementById('cityForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await db.collection('cities').add({
+            countryId: document.getElementById('cityCountry').value,
+            name: document.getElementById('cityName').value,
+            shippingCost: parseFloat(document.getElementById('cityCost').value)
+        });
+        alert('✅ تم إضافة المدينة');
+        document.getElementById('cityForm').reset();
+        loadCities();
+    });
+
+    async function loadCities() {
+        const snapshot = await db.collection('cities').get();
+        let html = '';
+        for (const doc of snapshot.docs) {
+            const c = doc.data();
+            const country = await db.collection('countries').doc(c.countryId).get();
+            html += `<div class="list-item"><span>${country.exists ? country.data().name : '-'} - ${c.name} (${c.shippingCost} ج)</span>
+                <div><button class="btn-sm btn-primary" onclick="editCity('${doc.id}')">تعديل</button>
+                <button class="btn-sm btn-danger" onclick="deleteCity('${doc.id}')">حذف</button></div></div>`;
+        }
+        document.getElementById('citiesList').innerHTML = html;
+    }
+
+    async function deleteCity(id) { if(confirm('متأكد؟')) { await db.collection('cities').doc(id).delete(); loadCities(); } }
+    async function editCity(id) {
+        const newCost = prompt('أدخل تكلفة الشحن الجديدة');
+        if (newCost && !isNaN(newCost)) { await db.collection('cities').doc(id).update({ shippingCost: parseFloat(newCost) }); loadCities(); }
+    }
+
+    // ===== الإعدادات العامة =====
+    document.getElementById('settingsForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = {
+            minOrderAmount: parseFloat(document.getElementById('minOrder').value) || 0,
+            defaultShippingCost: parseFloat(document.getElementById('defaultShipping').value) || 0,
+            taxPercentage: parseFloat(document.getElementById('taxPercent').value) || 0,
+            updatedAt: new Date().toISOString()
+        };
+        const doc = await db.collection('settings').doc('shipping').get();
+        if (doc.exists) await db.collection('settings').doc('shipping').update(data);
+        else await db.collection('settings').doc('shipping').set(data);
+        alert('✅ تم حفظ الإعدادات');
+        loadSettings();
+    });
+
+    async function loadSettings() {
+        const doc = await db.collection('settings').doc('shipping').get();
+        if (doc.exists) {
+            const s = doc.data();
+            document.getElementById('currentSettings').innerHTML = `
+                <strong>الإعدادات الحالية:</strong><br>
+                الحد الأدنى: ${s.minOrderAmount || 0} ج | الشحن الافتراضي: ${s.defaultShippingCost || 0} ج | الضريبة: ${s.taxPercentage || 0}%
+            `;
+            document.getElementById('minOrder').value = s.minOrderAmount || '';
+            document.getElementById('defaultShipping').value = s.defaultShippingCost || '';
+            document.getElementById('taxPercent').value = s.taxPercentage || '';
+        }
+    }
+
+    async function logout() { await auth.signOut(); window.location.href = 'admin.html'; }
+
+    window.deleteCountry = deleteCountry;
+    window.deleteCity = deleteCity;
+    window.editCity = editCity;
+    window.logout = logout;
+</script>
+
+</body>
+</html>

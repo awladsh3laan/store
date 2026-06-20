@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سياسة الخصوصية | أولاد شعلان</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Tajawal', sans-serif; background: #f0f2f5; }
+        :root {
+            --sky-blue: #00B4D8;
+            --gold-dark: #B8860B;
+            --gold-light: #DAA520;
+            --dark-bg: #1a2a3a;
+            --shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+        .header {
+            background: var(--dark-bg);
+            color: white;
+            padding: 0.8rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .logo-img { height: 40px; width: auto; max-width: 140px; object-fit: contain; }
+        .nav-links { display: flex; gap: 1.2rem; flex-wrap: wrap; align-items: center; }
+        .nav-links a { color: white; text-decoration: none; font-weight: 500; transition: all 0.3s; }
+        .nav-links a:hover { color: var(--gold-light); }
+
+        .container { padding: 2rem 5%; max-width: 900px; margin: 0 auto; }
+        .card { background: white; border-radius: 25px; padding: 2.5rem; box-shadow: var(--shadow); }
+        .card h1 { color: var(--gold-dark); font-size: 2rem; text-align: center; margin-bottom: 1.5rem; }
+        .card h3 { color: var(--sky-blue); margin: 1.5rem 0 0.5rem; }
+        .card p { line-height: 1.9; color: #444; margin-bottom: 0.8rem; }
+        .card ul { padding-right: 1.5rem; margin-bottom: 1rem; }
+        .card ul li { line-height: 1.8; color: #444; }
+
+        .footer { background: var(--dark-bg); color: white; padding: 2rem 5%; text-align: center; margin-top: 3rem; }
+
+        @media (max-width: 768px) {
+            .header { flex-direction: column; text-align: center; }
+            .card { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <img src="https://i.servimg.com/u/f54/18/11/62/61/tm/picsar12.png" alt="أولاد شعلان" class="logo-img">
+    <div class="nav-links">
+        <a href="index.html"><i class="fas fa-home"></i> الرئيسية</a>
+        <a href="store.html"><i class="fas fa-store"></i> المتجر</a>
+        <a href="privacy.html"><i class="fas fa-shield-halved"></i> الخصوصية</a>
+        <a href="track-order.html"><i class="fas fa-truck-fast"></i> تتبع الطلب</a>
+    </div>
+</header>
+
+<div class="container">
+    <div class="card">
+        <h1><i class="fas fa-shield-halved"></i> سياسة الخصوصية</h1>
+
+        <p>نحن في <strong>متجر أولاد شعلان</strong> نولي خصوصية عملائنا أهمية بالغة. نوضح في هذه السياسة كيفية جمع واستخدام وحماية بياناتك الشخصية.</p>
+
+        <h3>📌 المعلومات التي نجمعها</h3>
+        <ul>
+            <li><strong>الاسم</strong> - لتحديد هويتك ومعرفتك</li>
+            <li><strong>رقم الهاتف</strong> - للتواصل معك بخصوص الطلبات</li>
+            <li><strong>العنوان</strong> - لتوصيل الطلبات</li>
+            <li><strong>بيانات الطلب</strong> - المنتجات التي تطلبها</li>
+        </ul>
+
+        <h3>🔒 كيف نحمي بياناتك</h3>
+        <ul>
+            <li>نستخدم <strong>قواعد أمان عالية الجودة وشديدة الحماية</strong> لحماية قاعدة البيانات</li>
+            <li>لا نشارك بياناتك مع أي طرف ثالث</li>
+            <li>جميع المدفوعات تتم عبر بوابات دفع آمنة</li>
+        </ul>
+
+        <h3>📱 استخدام البيانات</h3>
+        <ul>
+            <li><strong>تجهيز الطلبات</strong> - لمعالجة طلباتك وتوصيلها</li>
+            <li><strong>التواصل</strong> - لإعلامك بحالة طلبك</li>
+            <li><strong>تحسين الخدمة</strong> - لفهم احتياجاتك بشكل أفضل</li>
+        </ul>
+
+        <h3>🔐 حقوقك</h3>
+        <ul>
+            <li>يمكنك طلب حذف بياناتك في أي وقت</li>
+            <li>يمكنك تعديل معلوماتك الشخصية</li>
+            <li>لديك الحق في معرفة البيانات المخزنة عنك</li>
+        </ul>
+
+        <p style="font-size:0.85rem;color:#888;border-top:1px solid #eee;padding-top:1.5rem;margin-top:1rem;">
+            آخر تحديث: 17 يونيو 2026
+        </p>
+    </div>
+</div>
+
+<footer class="footer">
+    <p>© 2026 متجر أولاد شعلان - جميع الحقوق محفوظة</p>
+</footer>
+
+</body>
+</html>
