@@ -5,13 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>أولاد شعلان | المنظفات والورقيات</title>
     
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-    
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -23,13 +18,13 @@
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: 'Tajawal', sans-serif;
             background: linear-gradient(135deg, #f5f7fa 0%, #e8edf2 100%);
             color: #1a2a3a;
+            font-size: 16px;
+            line-height: 1.6;
         }
-
         :root {
             --sky-blue: #00B4D8;
             --gold-dark: #B8860B;
@@ -37,185 +32,302 @@
             --green-light: #90E0EF;
             --dark-bg: #1a2a3a;
             --white: #ffffff;
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
             --transition: all 0.3s ease;
+            --radius: 16px;
+            --radius-sm: 10px;
         }
 
-        /* ===== الهيدر ===== */
+        /* ===== الهيدر (Mobile-First) ===== */
         .header {
             background: var(--dark-bg);
             color: white;
-            padding: 0.8rem 5%;
+            padding: 0.6rem 4%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
             position: sticky;
             top: 0;
             z-index: 1000;
-            box-shadow: var(--shadow);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 0.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
         }
-
         .logo-container {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.3rem;
         }
-
         .logo-img {
-            height: 45px;
+            height: 40px;
             width: auto;
-            max-width: 150px;
+            max-width: 140px;
             object-fit: contain;
         }
-
-        .logo-text {
-            font-size: 1.2rem;
-            font-weight: 800;
-            color: var(--gold-light);
-        }
-
-        .logo-text span {
-            color: var(--sky-blue);
-        }
-
         .nav-links {
             display: flex;
-            gap: 1.2rem;
-            align-items: center;
+            gap: 0.6rem;
             flex-wrap: wrap;
+            justify-content: center;
         }
-
         .nav-links a {
             color: white;
             text-decoration: none;
             font-weight: 500;
+            font-size: 0.8rem;
             transition: var(--transition);
-            font-size: 0.9rem;
+            padding: 0.2rem 0.5rem;
         }
-
         .nav-links a:hover {
             color: var(--gold-light);
         }
-
-        .user-icon {
-            font-size: 1.3rem;
-            cursor: pointer;
+        .nav-links .user-icon {
+            font-size: 1.1rem;
             color: var(--gold-light);
-            transition: var(--transition);
         }
 
-        .user-icon:hover {
-            color: var(--sky-blue);
-            transform: scale(1.1);
+        @media (min-width: 600px) {
+            .header {
+                flex-direction: row;
+                justify-content: space-between;
+                padding: 0.8rem 5%;
+            }
+            .nav-links a {
+                font-size: 0.95rem;
+                padding: 0.3rem 0.8rem;
+            }
         }
 
         /* ===== قسم التميمة ===== */
         .hero-section {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: space-between;
-            padding: 2rem 5%;
-            gap: 2rem;
-            flex-wrap: wrap;
+            padding: 1.5rem 4%;
+            gap: 1rem;
             background: linear-gradient(135deg, var(--sky-blue), var(--green-light));
-            margin: 0 0 1.5rem 0;
+            margin: 0 0 1rem 0;
             border-radius: 0 0 30px 30px;
-        }
-
-        .hero-text {
-            flex: 1;
-            min-width: 250px;
-            color: white;
-        }
-
-        .hero-text h1 {
-            font-size: 2.2rem;
-            font-weight: 800;
-            margin-bottom: 0.5rem;
-        }
-
-        .hero-text p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            line-height: 1.8;
-        }
-
-        .hero-image {
-            flex: 0 0 auto;
             text-align: center;
         }
-
+        .hero-text h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: white;
+        }
+        .hero-text h1 span {
+            color: var(--gold-light);
+        }
+        .hero-text p {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.95);
+            line-height: 1.8;
+            margin-top: 0.3rem;
+        }
         .hero-image img {
-            max-width: 250px;
+            max-width: 180px;
             width: 100%;
             height: auto;
-            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.2));
+            filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.15));
             animation: float 3s ease-in-out infinite;
         }
-
         @keyframes float {
             0%,
             100% {
                 transform: translateY(0);
             }
             50% {
-                transform: translateY(-15px);
+                transform: translateY(-10px);
             }
         }
 
-        /* ===== الكروت الرئيسية ===== */
-        .cards-section {
-            padding: 1.5rem 5%;
+        @media (min-width: 600px) {
+            .hero-section {
+                flex-direction: row;
+                justify-content: space-between;
+                text-align: right;
+                padding: 2rem 5%;
+                gap: 2rem;
+            }
+            .hero-text h1 {
+                font-size: 2.2rem;
+            }
+            .hero-text p {
+                font-size: 1.1rem;
+            }
+            .hero-image img {
+                max-width: 250px;
+            }
         }
 
+        /* ===== السلايدر ===== */
+        .slider-section {
+            margin: 0 4% 1.5rem;
+        }
+        .slider-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            background: #ddd;
+            min-height: 180px;
+        }
+        .slider-track {
+            display: flex;
+            transition: transform 0.6s ease;
+        }
+        .slide {
+            min-width: 100%;
+            position: relative;
+        }
+        .slide img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+        .slide-caption {
+            position: absolute;
+            bottom: 15%;
+            left: 10%;
+            right: 10%;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 0.6rem 1rem;
+            border-radius: var(--radius-sm);
+            text-align: center;
+        }
+        .slide-caption h2 {
+            font-size: 0.9rem;
+        }
+        .slide-caption p {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
+        .slider-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            z-index: 10;
+        }
+        .slider-btn:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+        .slider-btn.prev {
+            left: 8px;
+        }
+        .slider-btn.next {
+            right: 8px;
+        }
+        .slider-dots {
+            display: flex;
+            justify-content: center;
+            gap: 0.4rem;
+            margin-top: 0.5rem;
+        }
+        .slider-dots span {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ccc;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .slider-dots span.active {
+            background: var(--sky-blue);
+            transform: scale(1.2);
+        }
+        .slider-loading {
+            text-align: center;
+            padding: 2rem;
+            color: #999;
+        }
+        .slider-loading i {
+            font-size: 2rem;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (min-width: 600px) {
+            .slide img {
+                height: 300px;
+            }
+            .slide-caption h2 {
+                font-size: 1.4rem;
+            }
+            .slide-caption p {
+                font-size: 0.95rem;
+            }
+            .slider-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+        }
+        @media (min-width: 1024px) {
+            .slide img {
+                height: 400px;
+            }
+        }
+
+        /* ===== الكروت ===== */
+        .cards-section {
+            padding: 0.5rem 4% 1.5rem;
+        }
         .cards-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
         }
-
         .card {
             background: white;
-            border-radius: 20px;
-            padding: 1.5rem 1rem;
+            border-radius: var(--radius);
+            padding: 1rem 0.6rem;
             text-align: center;
             box-shadow: var(--shadow);
             cursor: pointer;
             transition: var(--transition);
-            position: relative;
-            overflow: hidden;
             text-decoration: none;
             color: inherit;
             display: block;
+            position: relative;
+            overflow: hidden;
+            min-height: 100px;
         }
-
         .card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
         }
-
         .card-icon {
-            font-size: 2.5rem;
+            font-size: 1.8rem;
             color: var(--sky-blue);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.2rem;
             transition: var(--transition);
         }
-
         .card:hover .card-icon {
             color: var(--gold-dark);
-            transform: scale(1.1);
         }
-
         .card-title {
             font-weight: 700;
-            font-size: 1.1rem;
+            font-size: 0.85rem;
             color: var(--dark-bg);
         }
-
-        /* ===== انزلاق شرح الكارت ===== */
         .card-desc {
             position: absolute;
             bottom: -100%;
@@ -223,33 +335,29 @@
             right: 0;
             background: linear-gradient(135deg, var(--sky-blue), var(--green-light));
             color: white;
-            padding: 1rem;
-            font-size: 0.8rem;
-            border-radius: 0 0 20px 20px;
+            padding: 0.6rem;
+            font-size: 0.7rem;
+            border-radius: 0 0 var(--radius) var(--radius);
             transition: bottom 0.4s ease;
             line-height: 1.6;
-            min-height: 70px;
+            min-height: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-
         .card:hover .card-desc {
             bottom: 0;
         }
 
-        /* ===== الكروت الثانوية ===== */
         .secondary-cards {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-top: 0.5rem;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.8rem;
         }
-
         .secondary-card {
             background: white;
-            border-radius: 15px;
-            padding: 1.2rem 1rem;
+            border-radius: var(--radius-sm);
+            padding: 0.8rem 0.5rem;
             text-align: center;
             box-shadow: var(--shadow);
             cursor: pointer;
@@ -260,149 +368,154 @@
             position: relative;
             overflow: hidden;
         }
-
         .secondary-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
         }
-
         .secondary-card .card-icon {
-            font-size: 1.8rem;
+            font-size: 1.4rem;
             color: var(--gold-dark);
         }
-
         .secondary-card .card-title {
-            font-size: 1rem;
+            font-size: 0.75rem;
+        }
+        .secondary-card .card-desc {
+            font-size: 0.6rem;
+            padding: 0.4rem;
+            min-height: 45px;
         }
 
-        .secondary-card .card-desc {
-            font-size: 0.7rem;
-            padding: 0.8rem;
-            min-height: 55px;
+        @media (min-width: 600px) {
+            .cards-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 1.2rem;
+            }
+            .secondary-cards {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 1.2rem;
+            }
+            .card {
+                padding: 1.5rem 1rem;
+                min-height: 130px;
+            }
+            .card-icon {
+                font-size: 2.5rem;
+            }
+            .card-title {
+                font-size: 1.1rem;
+            }
+            .secondary-card .card-icon {
+                font-size: 1.8rem;
+            }
+            .secondary-card .card-title {
+                font-size: 0.9rem;
+            }
+        }
+        @media (min-width: 1024px) {
+            .cards-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+            .secondary-cards {
+                grid-template-columns: repeat(4, 1fr);
+            }
         }
 
         /* ===== الفوتر ===== */
         .footer {
             background: var(--dark-bg);
             color: white;
-            padding: 2.5rem 5% 1.5rem;
+            padding: 1.5rem 4% 1rem;
             margin-top: 2rem;
         }
-
         .footer-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 2rem;
-            margin-bottom: 1.5rem;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
         }
-
         .footer-section h3 {
             color: var(--gold-light);
-            margin-bottom: 0.8rem;
-            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
         }
-
         .footer-section p,
         .footer-section a {
             color: #ccc;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             line-height: 1.8;
             text-decoration: none;
             display: block;
             transition: var(--transition);
         }
-
         .footer-section a:hover {
             color: var(--gold-light);
         }
-
         .footer-social {
             display: flex;
             gap: 1rem;
-            margin-top: 0.5rem;
+            margin-top: 0.3rem;
         }
-
         .footer-social a {
             font-size: 1.5rem;
             color: #ccc;
             transition: var(--transition);
         }
-
         .footer-social a:hover {
             color: var(--gold-light);
             transform: scale(1.1);
         }
-
         .footer-bottom {
             text-align: center;
-            padding-top: 1.5rem;
+            padding-top: 1rem;
             border-top: 1px solid #444;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: #999;
         }
-
         .footer-bottom strong {
             color: var(--gold-light);
         }
 
-        /* ===== التجاوب ===== */
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                text-align: center;
-                padding: 0.5rem 3%;
-            }
-            .hero-section {
-                flex-direction: column;
-                text-align: center;
-                padding: 1.5rem 3%;
-            }
-            .hero-text h1 {
-                font-size: 1.6rem;
-            }
-            .hero-image img {
-                max-width: 160px;
-            }
-            .cards-grid {
-                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-                gap: 1rem;
-            }
-            .secondary-cards {
-                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            }
+        @media (min-width: 600px) {
             .footer-grid {
-                grid-template-columns: 1fr;
-                text-align: center;
+                grid-template-columns: repeat(3, 1fr);
+                text-align: right;
             }
             .footer-social {
-                justify-content: center;
+                justify-content: flex-start;
             }
-            .nav-links {
-                justify-content: center;
-                gap: 0.8rem;
-            }
-            .nav-links a {
-                font-size: 0.8rem;
+        }
+        @media (min-width: 1024px) {
+            .footer {
+                padding: 2.5rem 5% 1.5rem;
             }
         }
 
-        @media (max-width: 480px) {
-            .cards-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 0.8rem;
-            }
-            .card {
-                padding: 1rem 0.5rem;
-            }
-            .card-icon {
-                font-size: 1.8rem;
-            }
-            .card-title {
-                font-size: 0.85rem;
-            }
-            .hero-text h1 {
-                font-size: 1.3rem;
-            }
+        /* ===== زر العودة للأعلى ===== */
+        .scroll-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--sky-blue);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 15px rgba(0, 180, 216, 0.4);
+            transition: var(--transition);
+            z-index: 999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .scroll-top:hover {
+            transform: scale(1.1);
+            background: var(--gold-dark);
+        }
+        .scroll-top.show {
+            display: flex;
         }
     </style>
 </head>
@@ -416,8 +529,8 @@
         <div class="nav-links">
             <a href="index.html"><i class="fas fa-home"></i> الرئيسية</a>
             <a href="store.html"><i class="fas fa-store"></i> المتجر</a>
-            <a href="price-list.html"><i class="fas fa-file-invoice-dollar"></i> عرض الأسعار</a>
-            <a href="track-order.html"><i class="fas fa-truck-fast"></i> تتبع الطلب</a>
+            <a href="price-list.html"><i class="fas fa-file-invoice-dollar"></i> الأسعار</a>
+            <a href="track-order.html"><i class="fas fa-truck-fast"></i> تتبع</a>
             <a href="admin.html" class="user-icon" title="لوحة التحكم"><i class="fas fa-user-shield"></i></a>
         </div>
     </header>
@@ -425,10 +538,10 @@
     <!-- ===== قسم التميمة ===== -->
     <section class="hero-section">
         <div class="hero-text">
-            <h1>مرحباً بك في <span style="color:var(--gold-light);">أولاد شعلان</span></h1>
+            <h1>مرحباً بك في <span>أولاد شعلان</span></h1>
             <p>
-                أولاد شعلان هو محل أو متجر لبيع المنظفات المنزلية و بعض منتجات الورقيات و بعض منتجات العناية الشخصية 
-                وبعض منتجات المبيدات الحشرية، و خبرة في مجال المنظفات لأكثر من 12 سنة.
+                متجر متخصص في المنظفات المنزلية، الورقيات، منتجات العناية الشخصية، والمبيدات الحشرية.
+                خبرة أكثر من 12 عاماً في مجال المنظفات.
             </p>
         </div>
         <div class="hero-image">
@@ -436,52 +549,53 @@
         </div>
     </section>
 
-    <!-- ===== الكروت الرئيسية ===== -->
+    <!-- ===== السلايدر ===== -->
+    <section class="slider-section">
+        <div class="slider-container" id="sliderContainer">
+            <div class="slider-loading" id="sliderLoading">
+                <i class="fas fa-spinner"></i>
+                <p>جاري تحميل السلايدر...</p>
+            </div>
+            <div class="slider-track" id="sliderTrack" style="display:none;"></div>
+            <button class="slider-btn prev" onclick="prevSlide()" style="display:none;" id="prevBtn"><i class="fas fa-chevron-right"></i></button>
+            <button class="slider-btn next" onclick="nextSlide()" style="display:none;" id="nextBtn"><i class="fas fa-chevron-left"></i></button>
+        </div>
+        <div class="slider-dots" id="sliderDots"></div>
+    </section>
+
+    <!-- ===== الكروت ===== -->
     <section class="cards-section">
         <div class="cards-grid">
-
-            <!-- كارت الرئيسية -->
             <a href="index.html" class="card">
                 <div class="card-icon"><i class="fas fa-house-chimney"></i></div>
                 <div class="card-title">الرئيسية</div>
                 <div class="card-desc">المركز الرئيسي لمتجر أولاد شعلان</div>
             </a>
-
-            <!-- كارت المتجر -->
             <a href="store.html" class="card">
                 <div class="card-icon"><i class="fas fa-store"></i></div>
                 <div class="card-title">المتجر</div>
                 <div class="card-desc">تصفح المنتجات، أضف للمفضلة، واطلب بسهولة</div>
             </a>
-
-            <!-- كارت عرض الأسعار -->
             <a href="price-list.html" class="card">
                 <div class="card-icon"><i class="fas fa-file-invoice-dollar"></i></div>
                 <div class="card-title">عرض الأسعار</div>
                 <div class="card-desc">إنشاء عرض أسعار لمجموعة من المنتجات</div>
             </a>
-
-            <!-- كارت تتبع الطلب -->
             <a href="track-order.html" class="card">
                 <div class="card-icon"><i class="fas fa-truck-fast"></i></div>
                 <div class="card-title">تتبع الطلب</div>
                 <div class="card-desc">متابعة تحديث طلبك فور إنشائه</div>
             </a>
-
-            <!-- كارت لوحة التحكم -->
+            <a href="play.html" class="card">
+                <div class="card-icon"><i class="fas fa-gamepad"></i></div>
+                <div class="card-title">الألعاب</div>
+                <div class="card-desc">شارك في المسابقات واربح جوائز قيمة</div>
+            </a>
             <a href="admin.html" class="card">
                 <div class="card-icon"><i class="fas fa-user-shield"></i></div>
                 <div class="card-title">لوحة التحكم</div>
                 <div class="card-desc">دخول المسئولين لإدارة المتجر</div>
             </a>
-
-            <!-- كارت الألعاب -->
-            <a href="play.html" class="card">
-                <div class="card-icon"><i class="fas fa-gamepad"></i></div>
-                <div class="card-title">الألعاب والمسابقات</div>
-                <div class="card-desc">شارك في المسابقات واربح جوائز قيمة</div>
-            </a>
-
         </div>
 
         <!-- ===== الكروت الثانوية ===== -->
@@ -491,20 +605,20 @@
                 <div class="card-title">من نحن</div>
                 <div class="card-desc">تعرف على متجر أولاد شعلان</div>
             </a>
+            <a href="how-to-use.html" class="secondary-card">
+                <div class="card-icon"><i class="fas fa-book-open"></i></div>
+                <div class="card-title">كيفية الاستخدام</div>
+                <div class="card-desc">دليل استخدام المنتجات</div>
+            </a>
+            <a href="offers.html" class="secondary-card">
+                <div class="card-icon"><i class="fas fa-tags"></i></div>
+                <div class="card-title">العروض</div>
+                <div class="card-desc">أفضل العروض والتخفيضات</div>
+            </a>
             <a href="privacy.html" class="secondary-card">
                 <div class="card-icon"><i class="fas fa-shield-halved"></i></div>
                 <div class="card-title">سياسة الخصوصية</div>
                 <div class="card-desc">كيف نحمي بياناتك</div>
-            </a>
-            <a href="shipping-policy.html" class="secondary-card">
-                <div class="card-icon"><i class="fas fa-truck"></i></div>
-                <div class="card-title">سياسة الشحن</div>
-                <div class="card-desc">شروط وأحكام الشحن والتوصيل</div>
-            </a>
-            <a href="return-policy.html" class="secondary-card">
-                <div class="card-icon"><i class="fas fa-rotate-left"></i></div>
-                <div class="card-title">سياسة الاستبدال والاسترجاع</div>
-                <div class="card-desc">شروط استبدال واسترجاع المنتجات</div>
             </a>
         </div>
     </section>
@@ -532,9 +646,14 @@
             </div>
         </div>
         <div class="footer-bottom">
-            تم إنشاء و تطوير هذا الموقع كاملاً بواسطة <strong>FAMO ELWAN</strong> &copy; 2026
+            تم إنشاء وتطوير هذا الموقع بواسطة <strong>FAMO ELWAN</strong> &copy; 2026
         </div>
     </footer>
+
+    <!-- ===== زر العودة للأعلى ===== -->
+    <button class="scroll-top" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+        <i class="fas fa-chevron-up"></i>
+    </button>
 
     <script>
         // ===== إعدادات Firebase =====
@@ -546,25 +665,139 @@
             messagingSenderId: "77191704198",
             appId: "1:77191704198:web:d2ce184d9c8ec2e876eb07"
         };
-
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
 
+        let sliders = [];
+        let currentSlide = 0;
+        let slideInterval;
+
+        // ===== تحميل السلايدر =====
+        async function loadSliders() {
+            const loading = document.getElementById('sliderLoading');
+            const track = document.getElementById('sliderTrack');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const dots = document.getElementById('sliderDots');
+
+            try {
+                const snapshot = await db.collection('sliders')
+                    .where('active', '==', true)
+                    .orderBy('order')
+                    .get();
+
+                if (snapshot.empty) {
+                    loading.innerHTML = '<p style="color:#999;">لا توجد صور سلايدر</p>';
+                    return;
+                }
+
+                sliders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                // عرض السلايدر
+                track.innerHTML = sliders.map(s => `
+                    <div class="slide">
+                        <img src="${s.imageUrl}" alt="${s.title || 'سلايدر'}">
+                        ${s.title || s.subtitle ? `
+                            <div class="slide-caption">
+                                ${s.title ? `<h2>${s.title}</h2>` : ''}
+                                ${s.subtitle ? `<p>${s.subtitle}</p>` : ''}
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('');
+
+                // النقاط
+                dots.innerHTML = sliders.map((_, i) =>
+                    `<span class="${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})"></span>`
+                ).join('');
+
+                // إظهار العناصر
+                loading.style.display = 'none';
+                track.style.display = 'flex';
+                prevBtn.style.display = 'block';
+                nextBtn.style.display = 'block';
+
+                // بدء التشغيل التلقائي
+                startAutoSlide();
+
+            } catch (error) {
+                console.error('خطأ في تحميل السلايدر:', error);
+                loading.innerHTML = '<p style="color:#dc3545;">حدث خطأ في تحميل السلايدر</p>';
+            }
+        }
+
+        // ===== التحكم بالسلايدر =====
+        function updateSlider() {
+            const track = document.getElementById('sliderTrack');
+            const dots = document.querySelectorAll('#sliderDots span');
+            track.style.transform = `translateX(-${currentSlide * 100}%)`;
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentSlide);
+            });
+        }
+
+        function nextSlide() {
+            if (sliders.length === 0) return;
+            currentSlide = (currentSlide + 1) % sliders.length;
+            updateSlider();
+            resetAutoSlide();
+        }
+
+        function prevSlide() {
+            if (sliders.length === 0) return;
+            currentSlide = (currentSlide - 1 + sliders.length) % sliders.length;
+            updateSlider();
+            resetAutoSlide();
+        }
+
+        function goToSlide(index) {
+            if (sliders.length === 0) return;
+            currentSlide = index;
+            updateSlider();
+            resetAutoSlide();
+        }
+
+        // ===== التشغيل التلقائي =====
+        function startAutoSlide() {
+            if (slideInterval) clearInterval(slideInterval);
+            slideInterval = setInterval(nextSlide, 5000);
+        }
+
+        function resetAutoSlide() {
+            if (slideInterval) {
+                clearInterval(slideInterval);
+                slideInterval = setInterval(nextSlide, 5000);
+            }
+        }
+
+        // ===== زر العودة للأعلى =====
+        window.addEventListener('scroll', () => {
+            const btn = document.getElementById('scrollTopBtn');
+            if (window.scrollY > 300) {
+                btn.classList.add('show');
+            } else {
+                btn.classList.remove('show');
+            }
+        });
+
         // ===== التحقق من حالة تسجيل دخول المدير =====
         auth.onAuthStateChanged((user) => {
             if (user) {
-                // إذا كان المستخدم مسجلاً، نتحقق من صلاحياته
                 db.collection('admins').doc(user.uid).get().then(doc => {
                     if (doc.exists) {
-                        // المستخدم أدمن - نغير أيقونة المستخدم
                         document.querySelector('.user-icon').innerHTML = '<i class="fas fa-check-circle" style="color:#28a745;"></i>';
                     }
                 });
             }
         });
 
-        console.log('✅ متجر أولاد شعلان يعمل بنجاح!');
+        // ===== التحميل =====
+        loadSliders();
+
+        window.prevSlide = prevSlide;
+        window.nextSlide = nextSlide;
+        window.goToSlide = goToSlide;
     </script>
 
 </body>
