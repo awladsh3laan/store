@@ -9,48 +9,126 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Tajawal', sans-serif; background: #f0f2f5; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: #f0f2f5;
+            font-size: 16px;
+            line-height: 1.6;
+        }
         :root {
             --sky-blue: #00B4D8;
             --gold-dark: #B8860B;
             --gold-light: #DAA520;
             --green-light: #90E0EF;
             --dark-bg: #1a2a3a;
-            --shadow: 0 8px 30px rgba(0,0,0,0.1);
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
             --transition: all 0.3s ease;
+            --radius: 16px;
+            --radius-sm: 10px;
         }
+
         .header {
             background: var(--dark-bg);
             color: white;
             padding: 0.8rem 5%;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
-            flex-wrap: wrap;
             gap: 0.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
-        .logo-img { height: 40px; width: auto; max-width: 140px; object-fit: contain; }
-        .back-link { color: white; text-decoration: none; }
-        .back-link:hover { color: var(--gold-light); }
+        .header .logo-img {
+            height: 40px;
+            width: auto;
+            max-width: 140px;
+            object-fit: contain;
+        }
+        .header .back-link {
+            color: white;
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+        .header .back-link:hover {
+            color: var(--gold-light);
+        }
 
-        .container { padding: 2rem 5%; max-width: 1100px; margin: 0 auto; }
-        .page-title { color: var(--dark-bg); font-size: 1.8rem; margin-bottom: 1.5rem; }
-        .page-title i { color: var(--gold-dark); }
+        .container {
+            padding: 1rem 4%;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .page-title {
+            color: var(--dark-bg);
+            font-size: 1.5rem;
+            margin-bottom: 1.2rem;
+            text-align: center;
+        }
+        .page-title i {
+            color: var(--gold-dark);
+        }
 
-        .checkout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
-        .card { background: white; border-radius: 25px; padding: 1.5rem; box-shadow: var(--shadow); }
-        .card h3 { color: var(--gold-dark); margin-bottom: 1rem; border-right: 4px solid var(--sky-blue); padding-right: 0.8rem; }
+        .checkout-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.2rem;
+        }
 
-        input, select, textarea {
+        .card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 1.2rem;
+            box-shadow: var(--shadow);
+        }
+        .card h3 {
+            color: var(--gold-dark);
+            margin-bottom: 0.8rem;
+            border-right: 4px solid var(--sky-blue);
+            padding-right: 0.8rem;
+            font-size: 1.1rem;
+        }
+
+        input,
+        select,
+        textarea {
             width: 100%;
-            padding: 0.7rem;
+            padding: 0.8rem;
             margin: 0.4rem 0;
             border: 1px solid #ddd;
-            border-radius: 10px;
+            border-radius: var(--radius-sm);
             font-family: inherit;
+            font-size: 1rem;
+            transition: var(--transition);
         }
-        input:focus, select:focus, textarea:focus { border-color: var(--sky-blue); outline: none; }
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: var(--sky-blue);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.1);
+        }
+        input.error,
+        select.error,
+        textarea.error {
+            border-color: #dc3545;
+            background: #fff5f5;
+        }
+        .error-msg {
+            color: #dc3545;
+            font-size: 0.85rem;
+            margin-top: 0.2rem;
+            display: none;
+        }
+        .error-msg.show {
+            display: block;
+        }
 
         .payment-opt {
             display: flex;
@@ -58,20 +136,79 @@
             gap: 0.8rem;
             padding: 0.6rem;
             border: 1px solid #ddd;
-            border-radius: 12px;
+            border-radius: var(--radius-sm);
             margin: 0.3rem 0;
             cursor: pointer;
             transition: var(--transition);
         }
-        .payment-opt:hover { border-color: var(--sky-blue); background: #f9f9f9; }
-        .payment-opt input { width: auto; margin: 0; }
+        .payment-opt:hover {
+            border-color: var(--sky-blue);
+            background: #f9f9f9;
+        }
+        .payment-opt input {
+            width: auto;
+            margin: 0;
+        }
 
-        .payment-detail { display: none; background: #f9f9f9; padding: 0.8rem; border-radius: 12px; margin-top: 0.5rem; }
-        .payment-detail.show { display: block; }
+        .payment-detail {
+            display: none;
+            background: #f9f9f9;
+            padding: 0.8rem;
+            border-radius: var(--radius-sm);
+            margin-top: 0.5rem;
+        }
+        .payment-detail.show {
+            display: block;
+        }
 
-        .order-summary { background: #f9f9f9; padding: 1rem; border-radius: 15px; margin: 1rem 0; }
-        .order-item { display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid #eee; }
-        .total-display { font-size: 1.3rem; font-weight: 700; color: var(--gold-dark); text-align: left; margin-top: 0.5rem; }
+        .order-summary {
+            background: #f9f9f9;
+            padding: 0.8rem;
+            border-radius: var(--radius-sm);
+            margin: 0.8rem 0;
+        }
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.4rem 0;
+            border-bottom: 1px solid #eee;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+        }
+        .order-item .item-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .order-item .item-controls button {
+            background: var(--sky-blue);
+            color: white;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+        .order-item .item-controls button:hover {
+            background: var(--gold-dark);
+        }
+        .order-item .item-controls .qty {
+            min-width: 25px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .total-display {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--gold-dark);
+            text-align: left;
+            margin-top: 0.5rem;
+        }
+
         .confirm-btn {
             width: 100%;
             padding: 0.9rem;
@@ -85,216 +222,596 @@
             transition: var(--transition);
             margin-top: 1rem;
         }
-        .confirm-btn:hover { transform: scale(1.02); }
+        .confirm-btn:hover:not(:disabled) {
+            transform: scale(1.02);
+        }
+        .confirm-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
 
-        .tracking-result { text-align: center; background: linear-gradient(135deg, var(--gold-dark), var(--gold-light)); color: white; padding: 1.5rem; border-radius: 20px; margin-top: 1rem; }
-        .tracking-result h3 { margin-bottom: 0.3rem; }
-        .tracking-code { font-size: 1.6rem; font-weight: 800; letter-spacing: 2px; direction: ltr; }
-        .copy-btn { background: white; color: var(--gold-dark); border: none; padding: 0.4rem 1.5rem; border-radius: 25px; cursor: pointer; margin-top: 0.5rem; font-weight: 600; }
+        .clear-cart-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.4rem 1rem;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: var(--transition);
+            margin-top: 0.5rem;
+        }
+        .clear-cart-btn:hover {
+            background: #c82333;
+        }
 
-        .footer { background: var(--dark-bg); color: white; padding: 2rem 5%; text-align: center; margin-top: 3rem; }
+        .tracking-result {
+            text-align: center;
+            background: linear-gradient(135deg, var(--gold-dark), var(--gold-light));
+            color: white;
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            margin-top: 1rem;
+        }
+        .tracking-result .tracking-code {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            direction: ltr;
+            word-break: break-all;
+        }
+        .copy-btn {
+            background: white;
+            color: var(--gold-dark);
+            border: none;
+            padding: 0.4rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            transition: var(--transition);
+        }
+        .copy-btn:hover {
+            transform: scale(1.05);
+        }
 
-        @media (max-width: 768px) {
-            .checkout-grid { grid-template-columns: 1fr; }
-            .header { flex-direction: column; text-align: center; }
+        .spinner {
+            display: none;
+            text-align: center;
+            padding: 0.5rem;
+        }
+        .spinner.show {
+            display: block;
+        }
+        .spinner i {
+            font-size: 1.5rem;
+            animation: spin 1s linear infinite;
+            color: var(--sky-blue);
+        }
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .footer {
+            background: var(--dark-bg);
+            color: white;
+            padding: 1.5rem 5%;
+            text-align: center;
+            font-size: 0.85rem;
+            margin-top: 2rem;
+        }
+
+        @media (min-width: 600px) {
+            .header {
+                flex-direction: row;
+                justify-content: space-between;
+                padding: 0.8rem 5%;
+            }
+            .checkout-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 1.5rem;
+            }
+            .container {
+                padding: 1.5rem 5%;
+            }
+            .page-title {
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .container {
+                padding: 2rem 5%;
+            }
+            .card {
+                padding: 1.8rem;
+            }
+        }
+
+        /* الرسائل التوضيحية */
+        .validation-hint {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: var(--radius-sm);
+            padding: 0.8rem;
+            margin-bottom: 0.8rem;
+            font-size: 0.9rem;
+            color: #856404;
+            display: none;
+        }
+        .validation-hint.show {
+            display: block;
+        }
+        .validation-hint i {
+            margin-left: 0.3rem;
         }
     </style>
 </head>
 <body>
 
-<header class="header">
-    <img src="https://i.servimg.com/u/f54/18/11/62/61/tm/picsar12.png" alt="أولاد شعلان" class="logo-img">
-    <a href="store.html" class="back-link"><i class="fas fa-arrow-left"></i> العودة للمتجر</a>
-</header>
+    <header class="header">
+        <img src="https://i.servimg.com/u/f54/18/11/62/61/tm/picsar12.png" alt="أولاد شعلان" class="logo-img">
+        <a href="store.html" class="back-link"><i class="fas fa-arrow-left"></i> العودة للمتجر</a>
+    </header>
 
-<div class="container">
-    <h1 class="page-title"><i class="fas fa-shopping-cart"></i> إتمام الشراء</h1>
+    <div class="container">
+        <h1 class="page-title"><i class="fas fa-shopping-cart"></i> إتمام الشراء</h1>
 
-    <div class="checkout-grid">
-        <!-- بيانات العميل -->
-        <div class="card">
-            <h3><i class="fas fa-user"></i> بيانات العميل</h3>
-            <input type="text" id="custName" placeholder="الاسم (حروف فقط)" required>
-            <input type="tel" id="custPhone" placeholder="رقم الهاتف (11 رقم)" required>
-            <textarea id="custAddress" rows="2" placeholder="العنوان بالكامل" required></textarea>
+        <div class="checkout-grid">
+            <!-- بيانات العميل -->
+            <div class="card">
+                <h3><i class="fas fa-user"></i> بيانات العميل</h3>
 
-            <h3 style="margin-top:1.5rem;"><i class="fas fa-money-bill"></i> طريقة الدفع</h3>
-            <div class="payment-opt" onclick="selectPayment('cash')">
-                <input type="radio" name="payment" value="cash" id="cashRadio">
-                <label>الدفع عند الاستلام</label>
-            </div>
-            <div class="payment-opt" onclick="selectPayment('instapay')">
-                <input type="radio" name="payment" value="instapay" id="instapayRadio">
-                <label>الدفع عبر إنستاباي</label>
-            </div>
-            <div id="instapayDetail" class="payment-detail">
-                <p><i class="fab fa-instalod"></i> رقم إنستاباي: <strong>01063835028</strong></p>
-            </div>
-            <div class="payment-opt" onclick="selectPayment('wallet')">
-                <input type="radio" name="payment" value="wallet" id="walletRadio">
-                <label>الدفع عبر المحفظة (+5 جنيه رسوم)</label>
-            </div>
-            <div id="walletDetail" class="payment-detail">
-                <select id="walletType">
-                    <option value="etisalat">📱 إي أند كاش: 01120282953</option>
-                    <option value="vodafone">📱 فودافون كاش: 01068385028</option>
+                <div class="validation-hint" id="validationHint">
+                    <i class="fas fa-info-circle"></i>
+                    <span id="validationMessage">الرجاء ملء جميع البيانات المطلوبة</span>
+                </div>
+
+                <input type="text" id="custName" placeholder="الاسم (حروف فقط)" required>
+                <div class="error-msg" id="nameError">⚠️ الاسم يجب أن يحتوي على حروف فقط</div>
+
+                <input type="tel" id="custPhone" placeholder="رقم الهاتف (11 رقم)" required>
+                <div class="error-msg" id="phoneError">⚠️ رقم الهاتف يجب أن يكون 11 رقم</div>
+
+                <textarea id="custAddress" rows="2" placeholder="العنوان بالكامل" required></textarea>
+                <div class="error-msg" id="addressError">⚠️ الرجاء إدخال العنوان</div>
+
+                <h3 style="margin-top:1.2rem;"><i class="fas fa-truck"></i> الشحن</h3>
+                <select id="citySelect" required>
+                    <option value="">اختر المدينة</option>
                 </select>
+                <div class="error-msg" id="cityError">⚠️ الرجاء اختيار المدينة</div>
+
+                <h3 style="margin-top:1.2rem;"><i class="fas fa-money-bill"></i> طريقة الدفع</h3>
+                <div class="payment-opt" onclick="selectPayment('cash')">
+                    <input type="radio" name="payment" value="cash" id="cashRadio">
+                    <label>الدفع عند الاستلام</label>
+                </div>
+                <div class="payment-opt" onclick="selectPayment('instapay')">
+                    <input type="radio" name="payment" value="instapay" id="instapayRadio">
+                    <label>الدفع عبر إنستاباي</label>
+                </div>
+                <div id="instapayDetail" class="payment-detail">
+                    <p><i class="fab fa-instalod"></i> رقم إنستاباي: <strong>01063835028</strong></p>
+                </div>
+                <div class="payment-opt" onclick="selectPayment('wallet')">
+                    <input type="radio" name="payment" value="wallet" id="walletRadio">
+                    <label>الدفع عبر المحفظة (+5 جنيه رسوم)</label>
+                </div>
+                <div id="walletDetail" class="payment-detail">
+                    <select id="walletType">
+                        <option value="etisalat">📱 إي أند كاش: 01120282953</option>
+                        <option value="vodafone">📱 فودافون كاش: 01068385028</option>
+                    </select>
+                </div>
+                <div class="error-msg" id="paymentError">⚠️ الرجاء اختيار طريقة الدفع</div>
+
+                <h3 style="margin-top:1.2rem;"><i class="fas fa-headset"></i> طريقة التواصل للتأكيد</h3>
+                <div class="payment-opt" onclick="selectContact('call')">
+                    <input type="radio" name="contact" value="call" id="callRadio">
+                    <label><i class="fas fa-phone"></i> مكالمة هاتفية</label>
+                </div>
+                <div class="payment-opt" onclick="selectContact('whatsapp')">
+                    <input type="radio" name="contact" value="whatsapp" id="whatsappRadio">
+                    <label><i class="fab fa-whatsapp"></i> واتساب</label>
+                </div>
+                <div class="error-msg" id="contactError">⚠️ الرجاء اختيار طريقة التواصل</div>
             </div>
 
-            <h3 style="margin-top:1.5rem;"><i class="fas fa-headset"></i> طريقة التواصل للتأكيد</h3>
-            <div class="payment-opt" onclick="selectContact('call')">
-                <input type="radio" name="contact" value="call" id="callRadio">
-                <label><i class="fas fa-phone"></i> مكالمة هاتفية</label>
-            </div>
-            <div class="payment-opt" onclick="selectContact('whatsapp')">
-                <input type="radio" name="contact" value="whatsapp" id="whatsappRadio">
-                <label><i class="fab fa-whatsapp"></i> واتساب</label>
-            </div>
-        </div>
+            <!-- ملخص الطلب -->
+            <div class="card">
+                <h3><i class="fas fa-receipt"></i> ملخص الطلب</h3>
+                <div id="summary" class="order-summary"></div>
+                <div id="extraFees"></div>
+                <div id="shippingCostDisplay" style="font-size:0.95rem;color:#666;"></div>
+                <div id="totalAmount" class="total-display"></div>
 
-        <!-- ملخص الطلب -->
-        <div class="card">
-            <h3><i class="fas fa-receipt"></i> ملخص الطلب</h3>
-            <div id="summary" class="order-summary"></div>
-            <div id="extraFees"></div>
-            <div id="totalAmount" class="total-display"></div>
-            <button class="confirm-btn" onclick="confirmOrder()"><i class="fas fa-check-circle"></i> تأكيد الطلب</button>
-            <div id="resultMessage"></div>
+                <button class="clear-cart-btn" onclick="clearCart()"><i class="fas fa-trash-alt"></i> تفريغ السلة</button>
+
+                <div class="spinner" id="orderSpinner"><i class="fas fa-spinner"></i> جاري معالجة الطلب...</div>
+                <button class="confirm-btn" id="confirmBtn" onclick="confirmOrder()">
+                    <i class="fas fa-check-circle"></i> تأكيد الطلب
+                </button>
+                <div id="resultMessage"></div>
+            </div>
         </div>
     </div>
-</div>
 
-<footer class="footer">
-    <p>© 2026 متجر أولاد شعلان - جميع الحقوق محفوظة</p>
-</footer>
+    <footer class="footer">
+        <p>© 2026 متجر أولاد شعلان - جميع الحقوق محفوظة</p>
+    </footer>
 
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyD5tuzZf8VTqT2J8MSZ5zLnzbqRsT_lipA",
-        authDomain: "awlad-sh3lan-store.firebaseapp.com",
-        projectId: "awlad-sh3lan-store",
-        storageBucket: "awlad-sh3lan-store.firebasestorage.app",
-        messagingSenderId: "77191704198",
-        appId: "1:77191704198:web:d2ce184d9c8ec2e876eb07"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-
-    let cart = JSON.parse(localStorage.getItem('cart')) || [];
-    let selectedPayment = null;
-    let selectedContact = null;
-    let walletFee = 0;
-
-    function renderSummary() {
-        const container = document.getElementById('summary');
-        let subtotal = 0;
-        container.innerHTML = cart.map(item => {
-            subtotal += item.price * item.quantity;
-            return `<div class="order-item"><span>${item.name} × ${item.quantity}</span><span>${(item.price * item.quantity).toFixed(2)} ج</span></div>`;
-        }).join('');
-
-        const feeContainer = document.getElementById('extraFees');
-        if (selectedPayment === 'wallet') {
-            walletFee = 5;
-            feeContainer.innerHTML = `<div class="order-item" style="color:var(--gold-dark);"><span>رسوم سحب المحفظة</span><span>5 ج</span></div>`;
-        } else {
-            walletFee = 0;
-            feeContainer.innerHTML = '';
-        }
-
-        const total = subtotal + walletFee;
-        document.getElementById('totalAmount').innerHTML = `الإجمالي: ${total.toFixed(2)} جنيه`;
-        return { subtotal, total };
-    }
-
-    function selectPayment(method) {
-        selectedPayment = method;
-        document.getElementById('instapayDetail').classList.toggle('show', method === 'instapay');
-        document.getElementById('walletDetail').classList.toggle('show', method === 'wallet');
-        renderSummary();
-    }
-
-    function selectContact(method) {
-        selectedContact = method;
-    }
-
-    function validate() {
-        const name = document.getElementById('custName').value.trim();
-        const phone = document.getElementById('custPhone').value.trim();
-        const address = document.getElementById('custAddress').value.trim();
-
-        if (!name || !/^[A-Za-z\u0600-\u06FF\s]+$/.test(name)) { alert('الرجاء إدخال اسم صحيح (حروف فقط)'); return false; }
-        if (!phone || !/^\d{11}$/.test(phone)) { alert('الرجاء إدخال رقم هاتف صحيح (11 رقم)'); return false; }
-        if (!address) { alert('الرجاء إدخال العنوان'); return false; }
-        if (!selectedPayment) { alert('الرجاء اختيار طريقة الدفع'); return false; }
-        if (!selectedContact) { alert('الرجاء اختيار طريقة التواصل'); return false; }
-        if (cart.length === 0) { alert('السلة فارغة'); return false; }
-        return true;
-    }
-
-    function generateTracking() {
-        return 'ORD-' + Math.random().toString(36).substring(2, 10).toUpperCase();
-    }
-
-    async function confirmOrder() {
-        if (!validate()) return;
-
-        const tracking = generateTracking();
-        const name = document.getElementById('custName').value;
-        const phone = document.getElementById('custPhone').value;
-        const address = document.getElementById('custAddress').value;
-        const walletType = document.getElementById('walletType')?.value || null;
-        const { total } = renderSummary();
-
-        const order = {
-            trackingCode: tracking,
-            customerName: name,
-            phone: phone,
-            address: address,
-            items: cart,
-            paymentMethod: selectedPayment,
-            walletType: walletType,
-            contactMethod: selectedContact,
-            totalAmount: total,
-            status: 'قيد المراجعة',
-            createdAt: new Date().toISOString()
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5tuzZf8VTqT2J8MSZ5zLnzbqRsT_lipA",
+            authDomain: "awlad-sh3lan-store.firebaseapp.com",
+            projectId: "awlad-sh3lan-store",
+            storageBucket: "awlad-sh3lan-store.firebasestorage.app",
+            messagingSenderId: "77191704198",
+            appId: "1:77191704198:web:d2ce184d9c8ec2e876eb07"
         };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-        await db.collection('orders').add(order);
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let selectedPayment = null;
+        let selectedContact = null;
+        let walletFee = 0;
+        let shippingCost = 0;
+        let cities = [];
+        let isProcessing = false;
 
-        document.getElementById('resultMessage').innerHTML = `
-            <div class="tracking-result">
-                <i class="fas fa-check-circle" style="font-size:2.5rem;"></i>
-                <h3>✅ تم استلام طلبك!</h3>
-                <p>رقم تتبع الطلب:</p>
-                <div class="tracking-code">${tracking}</div>
-                <button class="copy-btn" onclick="copyCode('${tracking}')"><i class="fas fa-copy"></i> نسخ</button>
-                <p style="margin-top:0.5rem;font-size:0.85rem;opacity:0.8;">
-                    يمكنك متابعة طلبك في <a href="track-order.html" style="color:white;text-decoration:underline;">تتبع الطلبات</a>
-                </p>
-            </div>
-        `;
+        // ===== تحميل المدن =====
+        async function loadCities() {
+            const snapshot = await db.collection('cities').get();
+            cities = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+            const select = document.getElementById('citySelect');
+            select.innerHTML = '<option value="">اختر المدينة</option>' +
+                cities.map(c => `<option value="${c.id}" data-cost="${c.shippingCost || 0}">${c.name}</option>`).join('');
+        }
 
-        localStorage.removeItem('cart');
-        cart = [];
+        // ===== عرض السلة =====
+        function renderSummary() {
+            const container = document.getElementById('summary');
+            let subtotal = 0;
+            if (cart.length === 0) {
+                container.innerHTML = '<p style="color:#999;text-align:center;">السلة فارغة</p>';
+                document.getElementById('totalAmount').innerHTML = 'الإجمالي: 0 جنيه';
+                document.getElementById('extraFees').innerHTML = '';
+                document.getElementById('shippingCostDisplay').innerHTML = '';
+                document.getElementById('confirmBtn').disabled = true;
+                return;
+            }
+            document.getElementById('confirmBtn').disabled = false;
+
+            container.innerHTML = cart.map((item, index) => {
+                subtotal += item.price * item.quantity;
+                return `
+                    <div class="order-item">
+                        <span>${item.name}</span>
+                        <div class="item-controls">
+                            <button onclick="updateQuantity(${index}, -1)"><i class="fas fa-minus"></i></button>
+                            <span class="qty">${item.quantity}</span>
+                            <button onclick="updateQuantity(${index}, 1)"><i class="fas fa-plus"></i></button>
+                            <span style="min-width:60px;text-align:left;">${(item.price * item.quantity).toFixed(2)} ج</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // رسوم المحفظة
+            const feeContainer = document.getElementById('extraFees');
+            if (selectedPayment === 'wallet') {
+                walletFee = 5;
+                feeContainer.innerHTML =
+                    `<div class="order-item" style="color:var(--gold-dark);"><span>رسوم سحب المحفظة</span><span>5 ج</span></div>`;
+            } else {
+                walletFee = 0;
+                feeContainer.innerHTML = '';
+            }
+
+            // تكلفة الشحن
+            const citySelect = document.getElementById('citySelect');
+            const selectedCity = citySelect.options[citySelect.selectedIndex];
+            shippingCost = selectedCity?.dataset?.cost ? parseFloat(selectedCity.dataset.cost) : 0;
+            document.getElementById('shippingCostDisplay').innerHTML = shippingCost > 0 ? `تكلفة الشحن: ${shippingCost} ج` :
+                '';
+
+            const total = subtotal + walletFee + shippingCost;
+            document.getElementById('totalAmount').innerHTML = `الإجمالي: ${total.toFixed(2)} جنيه`;
+            return { subtotal, total };
+        }
+
+        // ===== تحديث الكمية =====
+        function updateQuantity(index, change) {
+            if (cart[index].quantity + change <= 0) {
+                cart.splice(index, 1);
+            } else {
+                cart[index].quantity += change;
+            }
+            localStorage.setItem('cart', JSON.stringify(cart));
+            renderSummary();
+        }
+
+        // ===== تفريغ السلة =====
+        function clearCart() {
+            if (cart.length === 0) return;
+            if (confirm('هل تريد تفريغ السلة بالكامل؟')) {
+                cart = [];
+                localStorage.setItem('cart', JSON.stringify(cart));
+                renderSummary();
+                document.getElementById('resultMessage').innerHTML = '';
+            }
+        }
+
+        // ===== اختيار الدفع والتواصل =====
+        function selectPayment(method) {
+            selectedPayment = method;
+            document.getElementById('instapayDetail').classList.toggle('show', method === 'instapay');
+            document.getElementById('walletDetail').classList.toggle('show', method === 'wallet');
+            renderSummary();
+            clearValidationErrors();
+        }
+
+        function selectContact(method) {
+            selectedContact = method;
+            clearValidationErrors();
+        }
+
+        // ===== التحقق من صحة البيانات =====
+        function validateForm() {
+            let isValid = true;
+            const hint = document.getElementById('validationHint');
+            const msg = document.getElementById('validationMessage');
+            let errors = [];
+
+            const name = document.getElementById('custName').value.trim();
+            const phone = document.getElementById('custPhone').value.trim();
+            const address = document.getElementById('custAddress').value.trim();
+            const city = document.getElementById('citySelect').value;
+
+            // التحقق من الاسم
+            if (!name || !/^[A-Za-z\u0600-\u06FF\s]+$/.test(name)) {
+                document.getElementById('custName').classList.add('error');
+                document.getElementById('nameError').classList.add('show');
+                errors.push('الاسم غير صحيح (حروف فقط)');
+                isValid = false;
+            } else {
+                document.getElementById('custName').classList.remove('error');
+                document.getElementById('nameError').classList.remove('show');
+            }
+
+            // التحقق من الهاتف
+            if (!phone || !/^\d{11}$/.test(phone)) {
+                document.getElementById('custPhone').classList.add('error');
+                document.getElementById('phoneError').classList.add('show');
+                errors.push('رقم الهاتف غير صحيح (11 رقم)');
+                isValid = false;
+            } else {
+                document.getElementById('custPhone').classList.remove('error');
+                document.getElementById('phoneError').classList.remove('show');
+            }
+
+            // التحقق من العنوان
+            if (!address) {
+                document.getElementById('custAddress').classList.add('error');
+                document.getElementById('addressError').classList.add('show');
+                errors.push('العنوان مطلوب');
+                isValid = false;
+            } else {
+                document.getElementById('custAddress').classList.remove('error');
+                document.getElementById('addressError').classList.remove('show');
+            }
+
+            // التحقق من المدينة
+            if (!city) {
+                document.getElementById('citySelect').classList.add('error');
+                document.getElementById('cityError').classList.add('show');
+                errors.push('المدينة مطلوبة');
+                isValid = false;
+            } else {
+                document.getElementById('citySelect').classList.remove('error');
+                document.getElementById('cityError').classList.remove('show');
+            }
+
+            // التحقق من طريقة الدفع
+            if (!selectedPayment) {
+                document.getElementById('paymentError').classList.add('show');
+                errors.push('طريقة الدفع مطلوبة');
+                isValid = false;
+            } else {
+                document.getElementById('paymentError').classList.remove('show');
+            }
+
+            // التحقق من طريقة التواصل
+            if (!selectedContact) {
+                document.getElementById('contactError').classList.add('show');
+                errors.push('طريقة التواصل مطلوبة');
+                isValid = false;
+            } else {
+                document.getElementById('contactError').classList.remove('show');
+            }
+
+            // التحقق من السلة
+            if (cart.length === 0) {
+                errors.push('السلة فارغة');
+                isValid = false;
+            }
+
+            // عرض رسالة التحقق
+            if (!isValid) {
+                msg.textContent = '⚠️ ' + errors.join('، ');
+                hint.classList.add('show');
+            } else {
+                hint.classList.remove('show');
+            }
+
+            return isValid;
+        }
+
+        function clearValidationErrors() {
+            document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
+            document.querySelectorAll('.error-msg').forEach(el => el.classList.remove('show'));
+            document.getElementById('validationHint').classList.remove('show');
+        }
+
+        // ===== إنشاء كود تتبع =====
+        function generateTracking() {
+            return 'ORD-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+        }
+
+        // ===== تأكيد الطلب (مع Transaction) =====
+        async function confirmOrder() {
+            if (isProcessing) return;
+            if (!validateForm()) {
+                // التمرير إلى أعلى الصفحة لإظهار الأخطاء
+                document.querySelector('.container').scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
+
+            const confirmBtn = document.getElementById('confirmBtn');
+            const spinner = document.getElementById('orderSpinner');
+            isProcessing = true;
+            confirmBtn.disabled = true;
+            spinner.classList.add('show');
+            document.getElementById('resultMessage').innerHTML = '';
+
+            try {
+                const tracking = generateTracking();
+                const name = document.getElementById('custName').value;
+                const phone = document.getElementById('custPhone').value;
+                const address = document.getElementById('custAddress').value;
+                const cityId = document.getElementById('citySelect').value;
+                const walletType = document.getElementById('walletType')?.value || null;
+                const { total } = renderSummary();
+
+                // ===== استخدام Transaction لضمان خصم المخزون بشكل آمن =====
+                const result = await db.runTransaction(async (transaction) => {
+                    // 1. قراءة المنتجات الموجودة في السلة
+                    const productRefs = cart.map(item => db.collection('products').doc(item.id));
+                    const productDocs = await Promise.all(productRefs.map(ref => transaction.get(ref)));
+
+                    // 2. التحقق من المخزون
+                    for (let i = 0; i < productDocs.length; i++) {
+                        const doc = productDocs[i];
+                        if (!doc.exists) {
+                            throw new Error(`المنتج "${cart[i].name}" غير موجود`);
+                        }
+                        const stock = doc.data().stock || 0;
+                        if (stock < cart[i].quantity) {
+                            throw new Error(`المنتج "${cart[i].name}" غير متوفر بالكمية المطلوبة (المتبقي: ${stock})`);
+                        }
+                    }
+
+                    // 3. خصم المخزون
+                    for (let i = 0; i < productDocs.length; i++) {
+                        const doc = productDocs[i];
+                        const newStock = (doc.data().stock || 0) - cart[i].quantity;
+                        transaction.update(productRefs[i], {
+                            stock: newStock,
+                            updatedAt: new Date().toISOString()
+                        });
+                    }
+
+                    // 4. إنشاء الطلب
+                    const orderRef = db.collection('orders').doc();
+                    const orderData = {
+                        trackingCode: tracking,
+                        customerName: name,
+                        phone: phone,
+                        address: address,
+                        cityId: cityId,
+                        items: cart,
+                        paymentMethod: selectedPayment,
+                        walletType: walletType,
+                        contactMethod: selectedContact,
+                        totalAmount: total,
+                        shippingCost: shippingCost,
+                        status: 'قيد المراجعة',
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    };
+                    transaction.set(orderRef, orderData);
+
+                    return { orderRef, orderData };
+                });
+
+                // ===== عرض رسالة النجاح =====
+                document.getElementById('resultMessage').innerHTML = `
+                    <div class="tracking-result">
+                        <i class="fas fa-check-circle" style="font-size:2.5rem;"></i>
+                        <h3>✅ تم استلام طلبك!</h3>
+                        <p>رقم تتبع الطلب:</p>
+                        <div class="tracking-code">${tracking}</div>
+                        <button class="copy-btn" onclick="copyCode('${tracking}')"><i class="fas fa-copy"></i> نسخ</button>
+                        <p style="margin-top:0.8rem;font-size:0.85rem;opacity:0.8;">
+                            يمكنك متابعة طلبك في <a href="track-order.html" style="color:white;text-decoration:underline;">تتبع الطلبات</a>
+                        </p>
+                    </div>
+                `;
+
+                // تفريغ السلة
+                cart = [];
+                localStorage.setItem('cart', JSON.stringify(cart));
+                renderSummary();
+
+                // رسالة الدفع
+                if (selectedPayment === 'wallet' || selectedPayment === 'instapay') {
+                    setTimeout(() => {
+                        alert(`يرجى تحويل المبلغ ${total.toFixed(2)} جنيه إلى الرقم المحدد ثم تواصل معنا للتأكيد`);
+                    }, 500);
+                }
+
+            } catch (error) {
+                console.error('خطأ في إنشاء الطلب:', error);
+                let errorMsg = 'حدث خطأ أثناء معالجة الطلب: ' + error.message;
+                if (error.message.includes('غير متوفر')) {
+                    errorMsg = '⚠️ ' + error.message + '، الرجاء تعديل الكمية';
+                }
+                document.getElementById('resultMessage').innerHTML = `
+                    <div style="background:#f8d7da;color:#721c24;padding:1rem;border-radius:var(--radius-sm);margin-top:1rem;">
+                        <i class="fas fa-exclamation-circle"></i> ${errorMsg}
+                    </div>
+                `;
+            } finally {
+                isProcessing = false;
+                confirmBtn.disabled = false;
+                spinner.classList.remove('show');
+            }
+        }
+
+        // ===== نسخ كود التتبع =====
+        function copyCode(code) {
+            navigator.clipboard.writeText(code);
+            alert('✅ تم نسخ كود التتبع: ' + code);
+        }
+
+        // ===== أحداث التغيير =====
+        document.getElementById('citySelect')?.addEventListener('change', () => {
+            renderSummary();
+            clearValidationErrors();
+        });
+
+        document.getElementById('custName')?.addEventListener('input', clearValidationErrors);
+        document.getElementById('custPhone')?.addEventListener('input', clearValidationErrors);
+        document.getElementById('custAddress')?.addEventListener('input', clearValidationErrors);
+
+        // ===== التحميل الأولي =====
+        loadCities();
         renderSummary();
 
-        if (selectedPayment === 'wallet' || selectedPayment === 'instapay') {
-            alert(`يرجى تحويل المبلغ ${total} جنيه إلى الرقم المحدد ثم تواصل معنا للتأكيد`);
-        }
-    }
-
-    function copyCode(code) {
-        navigator.clipboard.writeText(code);
-        alert('✅ تم نسخ كود التتبع: ' + code);
-    }
-
-    renderSummary();
-    window.selectPayment = selectPayment;
-    window.selectContact = selectContact;
-    window.confirmOrder = confirmOrder;
-    window.copyCode = copyCode;
-</script>
+        window.selectPayment = selectPayment;
+        window.selectContact = selectContact;
+        window.updateQuantity = updateQuantity;
+        window.clearCart = clearCart;
+        window.confirmOrder = confirmOrder;
+        window.copyCode = copyCode;
+    </script>
 
 </body>
 </html>
