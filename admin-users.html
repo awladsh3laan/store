@@ -10,154 +10,514 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Tajawal', sans-serif; background: #f0f2f5; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: #f0f2f5;
+            font-size: 16px;
+            line-height: 1.6;
+        }
         :root {
             --sky-blue: #00B4D8;
             --gold-dark: #B8860B;
             --gold-light: #DAA520;
             --dark-bg: #1a2a3a;
-            --shadow: 0 8px 25px rgba(0,0,0,0.08);
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+            --radius: 16px;
+            --radius-sm: 10px;
         }
+
         .header {
             background: var(--dark-bg);
             color: white;
-            padding: 0.8rem 5%;
+            padding: 0.6rem 4%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .logo-img {
+            height: 40px;
+            width: auto;
+            max-width: 140px;
+            object-fit: contain;
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .header-actions span {
+            color: var(--gold-light);
+            font-size: 0.9rem;
+        }
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.4rem 1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: var(--transition);
+        }
+        .logout-btn:hover {
+            background: #c82333;
+        }
+
+        .container {
+            padding: 1rem 4%;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--sky-blue);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+        .back-link:hover {
+            color: var(--gold-dark);
+        }
+
+        .card {
+            background: white;
+            padding: 1.2rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+        }
+        .card h3 {
+            color: var(--gold-dark);
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.1rem;
+        }
+        .card .sub {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.8rem;
+        }
+        .form-grid input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        .form-grid input:focus {
+            border-color: var(--sky-blue);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.1);
+        }
+        .form-grid .full {
+            grid-column: 1 / -1;
+        }
+
+        .btn {
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .btn-primary {
+            background: var(--sky-blue);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #0098b8;
+            transform: scale(1.02);
+        }
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        .btn-sm {
+            padding: 0.3rem 0.8rem;
+            font-size: 0.8rem;
+            border-radius: 8px;
+        }
+
+        .admin-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 0.6rem;
+            border-bottom: 1px solid #eee;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .admin-item .info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
             flex-wrap: wrap;
         }
-        .logo-img { height: 40px; width: auto; max-width: 140px; object-fit: contain; }
-        .logout-btn { background: #dc3545; color: white; border: none; padding: 0.4rem 1.2rem; border-radius: 25px; cursor: pointer; }
-        .container { padding: 1.5rem 5%; }
-        .back-link { display: inline-block; margin-bottom: 1rem; color: var(--sky-blue); text-decoration: none; }
-        .card { background: white; padding: 1.5rem; border-radius: 20px; box-shadow: var(--shadow); margin-bottom: 1.5rem; }
-        .card h3 { color: var(--gold-dark); margin-bottom: 1rem; }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        .form-grid input { width: 100%; padding: 0.7rem; border: 1px solid #ddd; border-radius: 10px; font-family: inherit; }
-        .form-grid .full { grid-column: 1 / -1; }
-        .btn { padding: 0.7rem 1.5rem; border: none; border-radius: 30px; cursor: pointer; font-weight: 600; }
-        .btn-primary { background: var(--sky-blue); color: white; }
-        .btn-danger { background: #dc3545; color: white; }
-        .btn-sm { padding: 0.2rem 0.8rem; border: none; border-radius: 5px; cursor: pointer; font-size: 0.8rem; }
-        .admin-item { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem; border-bottom: 1px solid #eee; flex-wrap: wrap; }
-        @media (max-width: 768px) {
-            .form-grid { grid-template-columns: 1fr; }
-            .header { flex-direction: column; text-align: center; }
+        .admin-item .info i {
+            color: var(--gold-dark);
+        }
+        .admin-item .info .date {
+            color: #999;
+            font-size: 0.8rem;
+        }
+        .admin-item .actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .admin-item .actions .me {
+            color: var(--sky-blue);
+            font-size: 0.8rem;
+        }
+
+        .success-msg {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            border-radius: var(--radius-sm);
+            padding: 0.8rem;
+            margin-top: 0.8rem;
+            font-size: 0.95rem;
+            display: none;
+        }
+        .success-msg.show {
+            display: block;
+        }
+        .success-msg strong {
+            font-weight: 700;
+        }
+
+        .error-msg {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            border-radius: var(--radius-sm);
+            padding: 0.8rem;
+            margin-top: 0.8rem;
+            font-size: 0.95rem;
+            display: none;
+        }
+        .error-msg.show {
+            display: block;
+        }
+
+        .spinner {
+            display: none;
+            text-align: center;
+            padding: 0.5rem;
+            color: var(--sky-blue);
+        }
+        .spinner.show {
+            display: block;
+        }
+        .spinner i {
+            font-size: 1.5rem;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .footer {
+            background: var(--dark-bg);
+            color: white;
+            padding: 1.5rem 5%;
+            text-align: center;
+            font-size: 0.85rem;
+            margin-top: 2rem;
+        }
+
+        @media (min-width: 600px) {
+            .header {
+                flex-direction: row;
+                justify-content: space-between;
+                padding: 0.8rem 5%;
+            }
+            .form-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .container {
+                padding: 1.5rem 5%;
+            }
+            .card {
+                padding: 1.5rem;
+            }
+        }
+        @media (min-width: 1024px) {
+            .container {
+                padding: 2rem 5%;
+            }
+            .card {
+                padding: 2rem;
+            }
         }
     </style>
 </head>
 <body>
 
-<header class="header">
-    <img src="https://i.servimg.com/u/f54/18/11/62/61/tm/picsar12.png" alt="أولاد شعلان" class="logo-img">
-    <div><span style="color:var(--gold-light);">إدارة المسئولين</span> <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> خروج</button></div>
-</header>
+    <header class="header">
+        <img src="https://i.servimg.com/u/f54/18/11/62/61/tm/picsar12.png" alt="أولاد شعلان" class="logo-img">
+        <div class="header-actions">
+            <span><i class="fas fa-user-cog"></i> إدارة المسئولين</span>
+            <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> خروج</button>
+        </div>
+    </header>
 
-<div class="container">
-    <a href="admin-dashboard.html" class="back-link"><i class="fas fa-arrow-right"></i> العودة للوحة التحكم</a>
+    <div class="container">
+        <a href="admin-dashboard.html" class="back-link"><i class="fas fa-arrow-right"></i> العودة للوحة التحكم</a>
 
-    <div class="card">
-        <h3><i class="fas fa-user-plus"></i> إضافة مسئول جديد</h3>
-        <p style="color:#666;font-size:0.9rem;margin-bottom:1rem;">أضف بريداً إلكترونياً لمنحه صلاحيات الوصول للوحة التحكم</p>
-        <form id="adminForm" class="form-grid">
-            <input type="email" id="adminEmail" placeholder="البريد الإلكتروني للمسئول" required>
-            <div class="full"><button type="submit" class="btn btn-primary"><i class="fas fa-user-shield"></i> إضافة مسئول</button></div>
-        </form>
+        <!-- ===== إضافة مسئول جديد ===== -->
+        <div class="card">
+            <h3><i class="fas fa-user-plus"></i> إضافة مسئول جديد</h3>
+            <p class="sub">أضف بريداً إلكترونياً وكلمة مرور لمنحه صلاحيات الوصول للوحة التحكم</p>
+
+            <form id="adminForm" class="form-grid">
+                <input type="email" id="adminEmail" placeholder="البريد الإلكتروني للمسئول" required>
+                <input type="text" id="adminPassword" placeholder="كلمة المرور (6 خانات على الأقل)" required minlength="6">
+                <div class="full">
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="fas fa-user-shield"></i> إضافة مسئول
+                    </button>
+                </div>
+            </form>
+
+            <div class="spinner" id="adminSpinner"><i class="fas fa-spinner"></i> جاري إضافة المسئول...</div>
+            <div id="successMsg" class="success-msg"></div>
+            <div id="errorMsg" class="error-msg"></div>
+        </div>
+
+        <!-- ===== قائمة المسئولين ===== -->
+        <div class="card">
+            <h3><i class="fas fa-users"></i> قائمة المسئولين الحاليين</h3>
+            <div id="adminsList">
+                <p style="color:#999;text-align:center;padding:1rem;">جاري التحميل...</p>
+            </div>
+        </div>
     </div>
 
-    <div class="card">
-        <h3><i class="fas fa-users"></i> قائمة المسئولين الحاليين</h3>
-        <div id="adminsList"></div>
-    </div>
-</div>
+    <footer class="footer">
+        <p>© 2026 متجر أولاد شعلان - جميع الحقوق محفوظة</p>
+    </footer>
 
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyD5tuzZf8VTqT2J8MSZ5zLnzbqRsT_lipA",
-        authDomain: "awlad-sh3lan-store.firebaseapp.com",
-        projectId: "awlad-sh3lan-store",
-        storageBucket: "awlad-sh3lan-store.firebasestorage.app",
-        messagingSenderId: "77191704198",
-        appId: "1:77191704198:web:d2ce184d9c8ec2e876eb07"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5tuzZf8VTqT2J8MSZ5zLnzbqRsT_lipA",
+            authDomain: "awlad-sh3lan-store.firebaseapp.com",
+            projectId: "awlad-sh3lan-store",
+            storageBucket: "awlad-sh3lan-store.firebasestorage.app",
+            messagingSenderId: "77191704198",
+            appId: "1:77191704198:web:d2ce184d9c8ec2e876eb07"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
-    let currentUser = null;
+        let currentUser = null;
 
-    auth.onAuthStateChanged(async (user) => {
-        if (!user) { window.location.href = 'admin.html'; return; }
-        const adminDoc = await db.collection('admins').doc(user.uid).get();
-        if (!adminDoc.exists) { await auth.signOut(); window.location.href = 'admin.html'; return; }
-        currentUser = user;
-        loadAdmins();
-    });
+        // ===== التحقق من تسجيل الدخول =====
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                window.location.href = 'admin.html';
+                return;
+            }
+            try {
+                const adminDoc = await db.collection('admins').doc(user.uid).get();
+                if (!adminDoc.exists) {
+                    await auth.signOut();
+                    window.location.href = 'admin.html';
+                    return;
+                }
+                currentUser = user;
+                loadAdmins();
+            } catch (error) {
+                console.error('خطأ في التحقق:', error);
+            }
+        });
 
-    document.getElementById('adminForm')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('adminEmail').value.trim();
-        if (!email) return;
+        // ===== إضافة مسئول جديد =====
+        document.getElementById('adminForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
 
-        try {
-            // البحث عن المستخدم بالبريد الإلكتروني
-            const userQuery = await db.collection('users').where('email', '==', email).get();
-            let uid = null;
+            const email = document.getElementById('adminEmail').value.trim();
+            const password = document.getElementById('adminPassword').value.trim();
+            const successDiv = document.getElementById('successMsg');
+            const errorDiv = document.getElementById('errorMsg');
+            const spinner = document.getElementById('adminSpinner');
+            const submitBtn = document.getElementById('submitBtn');
 
-            if (userQuery.empty) {
-                // إذا لم يكن مسجلاً، نقوم بإنشاء حساب مؤقت (يتطلب تفعيل)
-                const userCred = await auth.createUserWithEmailAndPassword(email, '123456789');
-                uid = userCred.user.uid;
-                await userCred.user.sendEmailVerification();
-            } else {
-                uid = userQuery.docs[0].id;
+            // إخفاء الرسائل السابقة
+            successDiv.classList.remove('show');
+            errorDiv.classList.remove('show');
+
+            // التحقق من الإدخال
+            if (!email) {
+                errorDiv.textContent = '⚠️ الرجاء إدخال البريد الإلكتروني';
+                errorDiv.classList.add('show');
+                return;
+            }
+            if (!password || password.length < 6) {
+                errorDiv.textContent = '⚠️ كلمة المرور يجب أن تكون 6 خانات على الأقل';
+                errorDiv.classList.add('show');
+                return;
             }
 
-            // إضافة المستخدم إلى مجموعة الأدمن
-            await db.collection('admins').doc(uid).set({
-                email: email,
-                role: 'admin',
-                createdAt: new Date().toISOString(),
-                addedBy: currentUser?.email || 'unknown'
-            });
+            // تعطيل الزر وإظهار التحميل
+            submitBtn.disabled = true;
+            spinner.classList.add('show');
 
-            alert(`✅ تم إضافة ${email} كمسئول. كلمة المرور المؤقتة: 123456789`);
-            document.getElementById('adminForm').reset();
-            loadAdmins();
-        } catch (error) {
-            alert('❌ حدث خطأ: ' + error.message);
+            try {
+                // 1. إنشاء حساب جديد في Firebase Authentication
+                const userCred = await auth.createUserWithEmailAndPassword(email, password);
+                const uid = userCred.user.uid;
+
+                // 2. إرسال رابط تأكيد البريد الإلكتروني
+                await userCred.user.sendEmailVerification();
+
+                // 3. إضافة المستخدم إلى مجموعة admins في Firestore
+                await db.collection('admins').doc(uid).set({
+                    email: email,
+                    role: 'admin',
+                    createdAt: new Date().toISOString(),
+                    addedBy: currentUser?.email || 'unknown'
+                });
+
+                // 4. عرض رسالة النجاح
+                successDiv.innerHTML = `
+                    ✅ تم إضافة <strong>${email}</strong> كمسئول بنجاح.
+                    <br>🔑 كلمة المرور: <strong>${password}</strong>
+                    <br>📧 تم إرسال رابط تأكيد البريد الإلكتروني إلى ${email}.
+                `;
+                successDiv.classList.add('show');
+
+                // إعادة تعيين النموذج
+                document.getElementById('adminForm').reset();
+                loadAdmins();
+
+            } catch (error) {
+                console.error('خطأ في إضافة المسئول:', error);
+
+                let errorMessage = '❌ حدث خطأ: ';
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage += 'البريد الإلكتروني مستخدم بالفعل. حاول باستخدام بريد آخر.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage += 'البريد الإلكتروني غير صحيح.';
+                } else if (error.code === 'auth/weak-password') {
+                    errorMessage += 'كلمة المرور ضعيفة جداً. استخدم كلمة أقوى (6 خانات على الأقل).';
+                } else {
+                    errorMessage += error.message;
+                }
+                errorDiv.textContent = errorMessage;
+                errorDiv.classList.add('show');
+
+            } finally {
+                submitBtn.disabled = false;
+                spinner.classList.remove('show');
+            }
+        });
+
+        // ===== تحميل قائمة المسئولين =====
+        async function loadAdmins() {
+            try {
+                const snapshot = await db.collection('admins').get();
+                const container = document.getElementById('adminsList');
+
+                if (snapshot.empty) {
+                    container.innerHTML =
+                    '<p style="color:#999;text-align:center;padding:1rem;">لا يوجد مسئولين حتى الآن</p>';
+                    return;
+                }
+
+                container.innerHTML = snapshot.docs.map(doc => {
+                    const a = doc.data();
+                    const isCurrentUser = doc.id === currentUser?.uid;
+                    return `
+                        <div class="admin-item">
+                            <div class="info">
+                                <i class="fas fa-user-shield"></i>
+                                <span><strong>${a.email}</strong></span>
+                                <span class="date">${a.createdAt ? new Date(a.createdAt).toLocaleDateString('ar') : ''}</span>
+                            </div>
+                            <div class="actions">
+                                ${isCurrentUser ? '<span class="me">(أنت)</span>' : `<button class="btn btn-danger btn-sm" onclick="removeAdmin('${doc.id}')"><i class="fas fa-trash"></i> حذف</button>`}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            } catch (error) {
+                console.error('خطأ في تحميل المسئولين:', error);
+                document.getElementById('adminsList').innerHTML =
+                    '<p style="color:#dc3545;text-align:center;padding:1rem;">حدث خطأ في تحميل المسئولين</p>';
+            }
         }
-    });
 
-    async function loadAdmins() {
-        const snapshot = await db.collection('admins').get();
-        const container = document.getElementById('adminsList');
-        container.innerHTML = snapshot.docs.map(doc => {
-            const a = doc.data();
-            return `
-                <div class="admin-item">
-                    <span><i class="fas fa-user-shield" style="color:var(--gold-dark);"></i> ${a.email}</span>
-                    <span><small style="color:#999;">${a.createdAt ? new Date(a.createdAt).toLocaleDateString('ar') : ''}</small>
-                    ${doc.id !== currentUser?.uid ? `<button class="btn-sm btn-danger" onclick="removeAdmin('${doc.id}')"><i class="fas fa-trash"></i></button>` : '<span style="color:var(--sky-blue);font-size:0.8rem;">(أنت)</span>'}</span>
-                </div>
-            `;
-        }).join('');
-    }
+        // ===== حذف مسئول =====
+        async function removeAdmin(id) {
+            if (!confirm('⚠️ هل أنت متأكد من إزالة هذا المسئول؟')) return;
 
-    async function removeAdmin(id) {
-        if (confirm('هل أنت متأكد من إزالة هذا المسئول؟')) {
-            await db.collection('admins').doc(id).delete();
-            loadAdmins();
+            try {
+                // حذف من مجموعة admins
+                await db.collection('admins').doc(id).delete();
+
+                // (اختياري) حذف حساب Firebase Authentication
+                // ملاحظة: لا يمكن حذف المستخدم من Authentication إلا من خلال admin SDK
+                // يمكن ترك الحساب موجوداً ولكن بدون صلاحية الدخول
+
+                loadAdmins();
+                alert('✅ تم إزالة المسئول بنجاح');
+            } catch (error) {
+                alert('❌ حدث خطأ: ' + error.message);
+            }
         }
-    }
 
-    async function logout() { await auth.signOut(); window.location.href = 'admin.html'; }
+        // ===== تسجيل الخروج =====
+        async function logout() {
+            await auth.signOut();
+            window.location.href = 'admin.html';
+        }
 
-    window.removeAdmin = removeAdmin;
-    window.logout = logout;
-</script>
+        // ===== تصدير الدوال =====
+        window.removeAdmin = removeAdmin;
+        window.logout = logout;
+    </script>
 
 </body>
 </html>
